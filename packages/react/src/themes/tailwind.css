@@ -1,0 +1,401 @@
+/**
+ * TailGrid - Tailwind CSS Theme
+ *
+ * Uses Tailwind CSS utilities via @apply.
+ * Requires Tailwind CSS to be installed in your project.
+ *
+ * Usage:
+ *   import '@tailgrid/react/themes/tailwind.css';
+ */
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.tailgrid {
+  @apply w-full bg-white border border-gray-200 rounded-lg overflow-hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tailgrid-table-wrapper {
+  @apply overflow-x-auto;
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+
+.tailgrid-table {
+  @apply w-full border-collapse;
+  table-layout: fixed;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.tailgrid-thead {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.tailgrid-header-row {
+  @apply h-11;
+}
+
+.tailgrid-th {
+  @apply px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider;
+  @apply whitespace-nowrap overflow-hidden text-ellipsis relative select-none;
+}
+
+.tailgrid-th-sortable {
+  @apply cursor-pointer transition-colors duration-150;
+}
+
+.tailgrid-th-sortable:hover {
+  @apply bg-gray-100;
+}
+
+.tailgrid-th-content {
+  @apply flex items-center gap-1;
+}
+
+.tailgrid-sort-indicator {
+  @apply text-blue-500 font-bold;
+}
+
+/* ============================================
+   BODY
+   ============================================ */
+
+.tailgrid-tbody {
+  @apply bg-white divide-y divide-gray-100;
+}
+
+.tailgrid-row {
+  @apply transition-colors duration-150;
+}
+
+.tailgrid-row:hover {
+  @apply bg-gray-50;
+}
+
+.tailgrid-row-selected {
+  @apply bg-blue-50 !important;
+}
+
+.tailgrid-td {
+  @apply px-3 py-2 whitespace-nowrap overflow-hidden text-ellipsis text-sm text-gray-900;
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+
+.tailgrid-toolbar {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 gap-3 flex-wrap;
+}
+
+.tailgrid-toolbar-left,
+.tailgrid-toolbar-right {
+  @apply flex items-center gap-2;
+}
+
+/* Search */
+.tailgrid-search-wrapper {
+  @apply relative flex items-center;
+}
+
+.tailgrid-search-icon {
+  @apply absolute left-2 text-gray-400 pointer-events-none;
+}
+
+.tailgrid-search-input {
+  @apply pl-8 pr-8 py-2 text-sm border border-gray-200 rounded-md w-56;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-150;
+}
+
+.tailgrid-search-clear {
+  @apply absolute right-2 p-0.5 text-gray-400 hover:text-gray-600;
+  @apply rounded-sm hover:bg-gray-100 transition-colors duration-150;
+}
+
+/* AI Toggle */
+.tailgrid-ai-toggle {
+  @apply flex items-center gap-1 px-3 py-2 text-sm font-medium;
+  @apply bg-white border border-gray-200 rounded-md text-gray-500;
+  @apply hover:border-blue-500 hover:text-blue-500;
+  @apply transition-all duration-150 cursor-pointer;
+}
+
+.tailgrid-ai-toggle-active {
+  @apply bg-blue-50 border-blue-500 text-blue-600;
+}
+
+.tailgrid-shortcut-hint {
+  @apply text-xs px-1 py-0.5 bg-gray-100 rounded font-mono text-gray-400;
+}
+
+/* Filter Chips */
+.tailgrid-filter-chips {
+  @apply flex items-center gap-1 flex-wrap;
+}
+
+.tailgrid-filter-chip {
+  @apply inline-flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-md text-xs;
+}
+
+.tailgrid-filter-chip-label {
+  @apply text-gray-500;
+}
+
+.tailgrid-filter-chip-value {
+  @apply text-gray-900 font-medium;
+}
+
+.tailgrid-clear-filters {
+  @apply px-2 py-1 text-xs text-red-500 hover:bg-red-50 rounded-sm transition-colors duration-150;
+}
+
+/* ============================================
+   AI QUERY BAR
+   ============================================ */
+
+.tailgrid-ai-bar {
+  @apply px-4 py-3 border-b border-gray-200;
+  background: linear-gradient(135deg, rgb(59 130 246 / 0.05), rgb(139 92 246 / 0.05));
+}
+
+.tailgrid-ai-form {
+  @apply flex items-center gap-2;
+}
+
+.tailgrid-ai-icon {
+  @apply text-blue-500 flex items-center;
+}
+
+.tailgrid-ai-spinner {
+  @apply animate-spin;
+}
+
+.tailgrid-ai-input {
+  @apply flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md bg-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-150;
+}
+
+.tailgrid-ai-input-error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.tailgrid-ai-clear {
+  @apply p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-sm;
+  @apply transition-colors duration-150;
+}
+
+.tailgrid-ai-submit {
+  @apply flex items-center gap-1 px-3 py-2 text-sm font-medium;
+  @apply bg-blue-500 text-white rounded-md;
+  @apply hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply transition-colors duration-150;
+}
+
+.tailgrid-ai-enter-hint {
+  @apply text-xs opacity-70;
+}
+
+.tailgrid-ai-error {
+  @apply flex items-center gap-1 mt-2 px-3 py-2 text-sm text-red-600 bg-red-50 rounded-md;
+}
+
+.tailgrid-ai-error-dismiss {
+  @apply ml-auto p-0.5 text-red-500 hover:bg-red-100 rounded-sm transition-colors duration-150;
+}
+
+.tailgrid-ai-success {
+  @apply flex items-center gap-1 mt-2 px-3 py-2 text-sm text-green-600 bg-green-50 rounded-md;
+}
+
+.tailgrid-ai-confidence-warning {
+  @apply text-amber-500;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.tailgrid-pagination {
+  @apply flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50;
+}
+
+.tailgrid-pagination-info {
+  @apply text-sm text-gray-500;
+}
+
+.tailgrid-pagination-controls {
+  @apply flex items-center gap-2;
+}
+
+.tailgrid-pagination-btn {
+  @apply px-2 py-1 min-w-8 text-sm bg-white border border-gray-200 rounded-sm;
+  @apply hover:border-blue-500 hover:text-blue-500;
+  @apply disabled:opacity-40 disabled:cursor-not-allowed;
+  @apply transition-colors duration-150;
+}
+
+.tailgrid-pagination-page {
+  @apply text-sm text-gray-500 px-2;
+}
+
+.tailgrid-page-size-select {
+  @apply px-2 py-1 text-sm border border-gray-200 rounded-sm bg-white cursor-pointer;
+}
+
+/* ============================================
+   COLUMN RESIZER
+   ============================================ */
+
+.tailgrid-resizer {
+  @apply absolute right-0 top-0 h-full w-1 bg-transparent cursor-col-resize select-none;
+  @apply hover:bg-blue-500 hover:opacity-50 transition-colors duration-150;
+  touch-action: none;
+}
+
+.tailgrid-resizer-active {
+  @apply bg-blue-500 opacity-100;
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.tailgrid-checkbox {
+  @apply inline-flex items-center justify-center cursor-pointer;
+}
+
+.tailgrid-checkbox-input {
+  @apply absolute opacity-0 w-0 h-0;
+}
+
+.tailgrid-checkbox-visual {
+  @apply w-4 h-4 border-2 border-gray-300 rounded-sm bg-white;
+  @apply flex items-center justify-center transition-all duration-150;
+}
+
+.tailgrid-checkbox:hover .tailgrid-checkbox-visual {
+  @apply border-blue-500;
+}
+
+.tailgrid-checkbox-checked .tailgrid-checkbox-visual,
+.tailgrid-checkbox-indeterminate .tailgrid-checkbox-visual {
+  @apply bg-blue-500 border-blue-500 text-white;
+}
+
+.tailgrid-checkbox-disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* ============================================
+   VIRTUALIZATION
+   ============================================ */
+
+.tailgrid-virtualized-container {
+  @apply overflow-auto;
+  will-change: transform;
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-md hover:bg-gray-400;
+}
+
+.tailgrid-loading-more {
+  @apply flex items-center justify-center gap-2 py-3 text-sm text-gray-500;
+}
+
+.tailgrid-loading-spinner {
+  @apply animate-spin;
+}
+
+.tailgrid-end-of-data {
+  @apply flex items-center justify-center py-3 text-sm text-gray-400 border-t border-gray-200;
+}
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+
+.tailgrid-loading,
+.tailgrid-empty {
+  @apply flex items-center justify-center py-12 px-4 text-gray-500 text-sm min-h-52;
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+.tailgrid-dark {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.tailgrid-dark .tailgrid-thead {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.tailgrid-dark .tailgrid-th {
+  @apply text-gray-400;
+}
+
+.tailgrid-dark .tailgrid-th-sortable:hover {
+  @apply bg-gray-600;
+}
+
+.tailgrid-dark .tailgrid-tbody {
+  @apply bg-gray-800 divide-gray-700;
+}
+
+.tailgrid-dark .tailgrid-row:hover {
+  @apply bg-gray-700;
+}
+
+.tailgrid-dark .tailgrid-row-selected {
+  @apply bg-blue-900/30 !important;
+}
+
+.tailgrid-dark .tailgrid-td {
+  @apply text-gray-100;
+}
+
+.tailgrid-dark .tailgrid-toolbar {
+  @apply border-gray-700;
+}
+
+.tailgrid-dark .tailgrid-pagination {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.tailgrid-dark .tailgrid-pagination-info,
+.tailgrid-dark .tailgrid-pagination-page {
+  @apply text-gray-400;
+}
+
+.tailgrid-dark .tailgrid-pagination-btn {
+  @apply bg-gray-800 border-gray-600 text-gray-300;
+}
+
+.tailgrid-dark .tailgrid-search-input,
+.tailgrid-dark .tailgrid-ai-input {
+  @apply bg-gray-700 border-gray-600 text-gray-100;
+}
+
+.tailgrid-dark .tailgrid-loading,
+.tailgrid-dark .tailgrid-empty {
+  @apply text-gray-400;
+}

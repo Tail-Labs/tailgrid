@@ -1,16 +1,51 @@
-// Components
+// ============================================
+// COMPONENTS
+// ============================================
+
 export { TailGrid } from './components/TailGrid';
-export type { TailGridProps } from './components/TailGrid';
+export { GridToolbar } from './components/GridToolbar';
+export { AIQueryBar } from './components/AIQueryBar';
+export { SelectionCheckbox } from './components/SelectionCheckbox';
+export { ColumnResizer } from './components/ColumnResizer';
+export { VirtualizedBody } from './components/VirtualizedBody';
 
-// Hooks
+// ============================================
+// HOOKS
+// ============================================
+
 export { useTailGrid } from './hooks/useTailGrid';
-export type { UseTailGridReturn } from './hooks/useTailGrid';
+export { useVirtualization } from './hooks/useVirtualization';
+export { useAIQuery } from './hooks/useAIQuery';
 
-// Re-export core types
+// ============================================
+// TYPES
+// ============================================
+
+export type {
+  TailGridProps,
+  TailGridRenderContext,
+  UseTailGridReturn,
+  UseAIQueryOptions,
+  UseAIQueryReturn,
+  UseColumnResizeOptions,
+  UseColumnResizeReturn,
+  UseKeyboardNavigationOptions,
+  UseKeyboardNavigationReturn,
+} from './types';
+
+export {
+  defaultClassNames,
+  mergeClassNames,
+  cx,
+} from './types';
+
+// Re-export core types for convenience
 export type {
   TailGridOptions,
   TailGridColumn,
   TailGridInstance,
+  TailGridClassNames,
+  TailGridAriaLabels,
   CellContext,
   SortDirection,
   SortConfig,
@@ -24,4 +59,9 @@ export type {
   SelectionState,
   AIQueryResult,
   AIProviderConfig,
+  AIQueryBarConfig,
+  AIQueryBarMode,
+  ThemeConfig,
+  ThemeMode,
+  A11yConfig,
 } from '@tailgrid/core';

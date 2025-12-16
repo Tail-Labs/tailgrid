@@ -1,0 +1,287 @@
+/**
+ * TailGrid - Dark Theme (Standalone)
+ *
+ * Import this alongside or instead of default.css for dark mode.
+ * Can also be used with data-theme="dark" attribute.
+ *
+ * Usage:
+ *   import '@tailgrid/react/themes/dark.css';
+ *
+ *   // Option 1: Use .tailgrid-dark class
+ *   <TailGrid theme="dark" ... />
+ *
+ *   // Option 2: System preference
+ *   @media (prefers-color-scheme: dark) { ... }
+ */
+
+/* ============================================
+   DARK THEME - CLASS BASED
+   ============================================ */
+
+.tailgrid-dark,
+.tailgrid[data-theme="dark"],
+[data-theme="dark"] .tailgrid {
+  /* Colors */
+  --tailgrid-bg: #0f172a;
+  --tailgrid-bg-hover: #1e293b;
+  --tailgrid-bg-selected: #1e3a5f;
+  --tailgrid-border: #334155;
+  --tailgrid-text: #f1f5f9;
+  --tailgrid-text-secondary: #94a3b8;
+  --tailgrid-text-muted: #64748b;
+  --tailgrid-primary: #3b82f6;
+  --tailgrid-primary-hover: #60a5fa;
+  --tailgrid-success: #22c55e;
+  --tailgrid-error: #ef4444;
+  --tailgrid-warning: #f59e0b;
+
+  /* Override backgrounds */
+  background-color: var(--tailgrid-bg);
+  color: var(--tailgrid-text);
+  border-color: var(--tailgrid-border);
+}
+
+/* ============================================
+   DARK THEME - SYSTEM PREFERENCE
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  .tailgrid:not(.tailgrid-light) {
+    --tailgrid-bg: #0f172a;
+    --tailgrid-bg-hover: #1e293b;
+    --tailgrid-bg-selected: #1e3a5f;
+    --tailgrid-border: #334155;
+    --tailgrid-text: #f1f5f9;
+    --tailgrid-text-secondary: #94a3b8;
+    --tailgrid-text-muted: #64748b;
+    --tailgrid-primary: #3b82f6;
+    --tailgrid-primary-hover: #60a5fa;
+    --tailgrid-success: #22c55e;
+    --tailgrid-error: #ef4444;
+    --tailgrid-warning: #f59e0b;
+  }
+}
+
+/* ============================================
+   COMPONENT SPECIFIC DARK OVERRIDES
+   ============================================ */
+
+/* These override default.css when dark mode is active */
+
+.tailgrid-dark .tailgrid-thead,
+.tailgrid[data-theme="dark"] .tailgrid-thead {
+  background-color: var(--tailgrid-bg-hover);
+  border-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-th,
+.tailgrid[data-theme="dark"] .tailgrid-th {
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-dark .tailgrid-th-sortable:hover,
+.tailgrid[data-theme="dark"] .tailgrid-th-sortable:hover {
+  background-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-tbody,
+.tailgrid[data-theme="dark"] .tailgrid-tbody {
+  background-color: var(--tailgrid-bg);
+}
+
+.tailgrid-dark .tailgrid-row,
+.tailgrid[data-theme="dark"] .tailgrid-row {
+  border-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-row:hover,
+.tailgrid[data-theme="dark"] .tailgrid-row:hover {
+  background-color: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-dark .tailgrid-row-selected,
+.tailgrid[data-theme="dark"] .tailgrid-row-selected {
+  background-color: var(--tailgrid-bg-selected) !important;
+}
+
+.tailgrid-dark .tailgrid-td,
+.tailgrid[data-theme="dark"] .tailgrid-td {
+  color: var(--tailgrid-text);
+}
+
+/* Toolbar */
+.tailgrid-dark .tailgrid-toolbar,
+.tailgrid[data-theme="dark"] .tailgrid-toolbar {
+  border-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-search-input,
+.tailgrid[data-theme="dark"] .tailgrid-search-input {
+  background-color: var(--tailgrid-bg-hover);
+  border-color: var(--tailgrid-border);
+  color: var(--tailgrid-text);
+}
+
+.tailgrid-dark .tailgrid-search-input:focus,
+.tailgrid[data-theme="dark"] .tailgrid-search-input:focus {
+  border-color: var(--tailgrid-primary);
+}
+
+.tailgrid-dark .tailgrid-search-icon,
+.tailgrid[data-theme="dark"] .tailgrid-search-icon {
+  color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-dark .tailgrid-search-clear,
+.tailgrid[data-theme="dark"] .tailgrid-search-clear {
+  color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-dark .tailgrid-search-clear:hover,
+.tailgrid[data-theme="dark"] .tailgrid-search-clear:hover {
+  color: var(--tailgrid-text);
+  background-color: var(--tailgrid-border);
+}
+
+/* AI Toggle */
+.tailgrid-dark .tailgrid-ai-toggle,
+.tailgrid[data-theme="dark"] .tailgrid-ai-toggle {
+  background-color: var(--tailgrid-bg-hover);
+  border-color: var(--tailgrid-border);
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-dark .tailgrid-ai-toggle:hover,
+.tailgrid[data-theme="dark"] .tailgrid-ai-toggle:hover {
+  border-color: var(--tailgrid-primary);
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-dark .tailgrid-shortcut-hint,
+.tailgrid[data-theme="dark"] .tailgrid-shortcut-hint {
+  background-color: var(--tailgrid-border);
+  color: var(--tailgrid-text-muted);
+}
+
+/* Filter Chips */
+.tailgrid-dark .tailgrid-filter-chip,
+.tailgrid[data-theme="dark"] .tailgrid-filter-chip {
+  background-color: var(--tailgrid-bg-selected);
+}
+
+.tailgrid-dark .tailgrid-filter-chip-label,
+.tailgrid[data-theme="dark"] .tailgrid-filter-chip-label {
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-dark .tailgrid-filter-chip-value,
+.tailgrid[data-theme="dark"] .tailgrid-filter-chip-value {
+  color: var(--tailgrid-text);
+}
+
+/* AI Bar */
+.tailgrid-dark .tailgrid-ai-bar,
+.tailgrid[data-theme="dark"] .tailgrid-ai-bar {
+  border-color: var(--tailgrid-border);
+  background: linear-gradient(135deg, rgb(59 130 246 / 0.1), rgb(139 92 246 / 0.1));
+}
+
+.tailgrid-dark .tailgrid-ai-input,
+.tailgrid[data-theme="dark"] .tailgrid-ai-input {
+  background-color: var(--tailgrid-bg);
+  border-color: var(--tailgrid-border);
+  color: var(--tailgrid-text);
+}
+
+.tailgrid-dark .tailgrid-ai-input:focus,
+.tailgrid[data-theme="dark"] .tailgrid-ai-input:focus {
+  border-color: var(--tailgrid-primary);
+}
+
+.tailgrid-dark .tailgrid-ai-clear,
+.tailgrid[data-theme="dark"] .tailgrid-ai-clear {
+  color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-dark .tailgrid-ai-clear:hover,
+.tailgrid[data-theme="dark"] .tailgrid-ai-clear:hover {
+  color: var(--tailgrid-text);
+  background-color: var(--tailgrid-border);
+}
+
+/* Pagination */
+.tailgrid-dark .tailgrid-pagination,
+.tailgrid[data-theme="dark"] .tailgrid-pagination {
+  background-color: var(--tailgrid-bg-hover);
+  border-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-pagination-info,
+.tailgrid-dark .tailgrid-pagination-page,
+.tailgrid[data-theme="dark"] .tailgrid-pagination-info,
+.tailgrid[data-theme="dark"] .tailgrid-pagination-page {
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-dark .tailgrid-pagination-btn,
+.tailgrid[data-theme="dark"] .tailgrid-pagination-btn {
+  background-color: var(--tailgrid-bg);
+  border-color: var(--tailgrid-border);
+  color: var(--tailgrid-text);
+}
+
+.tailgrid-dark .tailgrid-pagination-btn:hover:not(:disabled),
+.tailgrid[data-theme="dark"] .tailgrid-pagination-btn:hover:not(:disabled) {
+  border-color: var(--tailgrid-primary);
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-dark .tailgrid-page-size-select,
+.tailgrid[data-theme="dark"] .tailgrid-page-size-select {
+  background-color: var(--tailgrid-bg);
+  border-color: var(--tailgrid-border);
+  color: var(--tailgrid-text);
+}
+
+/* Checkbox */
+.tailgrid-dark .tailgrid-checkbox-visual,
+.tailgrid[data-theme="dark"] .tailgrid-checkbox-visual {
+  border-color: var(--tailgrid-border);
+  background-color: var(--tailgrid-bg);
+}
+
+/* Resizer */
+.tailgrid-dark .tailgrid-resizer:hover,
+.tailgrid[data-theme="dark"] .tailgrid-resizer:hover {
+  background-color: var(--tailgrid-primary);
+}
+
+/* Virtualization */
+.tailgrid-dark .tailgrid-virtualized-container::-webkit-scrollbar-track,
+.tailgrid[data-theme="dark"] .tailgrid-virtualized-container::-webkit-scrollbar-track {
+  background-color: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-dark .tailgrid-virtualized-container::-webkit-scrollbar-thumb,
+.tailgrid[data-theme="dark"] .tailgrid-virtualized-container::-webkit-scrollbar-thumb {
+  background-color: var(--tailgrid-border);
+}
+
+.tailgrid-dark .tailgrid-loading-more,
+.tailgrid[data-theme="dark"] .tailgrid-loading-more {
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-dark .tailgrid-end-of-data,
+.tailgrid[data-theme="dark"] .tailgrid-end-of-data {
+  color: var(--tailgrid-text-muted);
+  border-color: var(--tailgrid-border);
+}
+
+/* Loading & Empty States */
+.tailgrid-dark .tailgrid-loading,
+.tailgrid-dark .tailgrid-empty,
+.tailgrid[data-theme="dark"] .tailgrid-loading,
+.tailgrid[data-theme="dark"] .tailgrid-empty {
+  color: var(--tailgrid-text-secondary);
+}

@@ -30,4 +30,15 @@ export type {
   // AI
   AIQueryResult,
   AIProviderConfig,
+  AIQueryBarConfig,
+  AIQueryBarMode,
+
+  // Theming
+  ThemeConfig,
+  ThemeMode,
+  TailGridClassNames,
+
+  // Accessibility
+  A11yConfig,
+  TailGridAriaLabels,
 } from './types';

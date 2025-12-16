@@ -1,0 +1,676 @@
+/**
+ * TailGrid - Default Theme
+ *
+ * A clean, modern theme using CSS custom properties for easy customization.
+ *
+ * Usage:
+ *   import '@tailgrid/react/themes/default.css';
+ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================ */
+
+:root {
+  /* Colors */
+  --tailgrid-bg: #ffffff;
+  --tailgrid-bg-hover: #f9fafb;
+  --tailgrid-bg-selected: #eff6ff;
+  --tailgrid-border: #e5e7eb;
+  --tailgrid-text: #111827;
+  --tailgrid-text-secondary: #6b7280;
+  --tailgrid-text-muted: #9ca3af;
+  --tailgrid-primary: #3b82f6;
+  --tailgrid-primary-hover: #2563eb;
+  --tailgrid-success: #10b981;
+  --tailgrid-error: #ef4444;
+  --tailgrid-warning: #f59e0b;
+
+  /* Spacing */
+  --tailgrid-spacing-xs: 4px;
+  --tailgrid-spacing-sm: 8px;
+  --tailgrid-spacing-md: 12px;
+  --tailgrid-spacing-lg: 16px;
+  --tailgrid-spacing-xl: 24px;
+
+  /* Border Radius */
+  --tailgrid-radius-sm: 4px;
+  --tailgrid-radius-md: 6px;
+  --tailgrid-radius-lg: 8px;
+
+  /* Shadows */
+  --tailgrid-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tailgrid-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* Typography */
+  --tailgrid-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tailgrid-font-size-xs: 11px;
+  --tailgrid-font-size-sm: 13px;
+  --tailgrid-font-size-md: 14px;
+  --tailgrid-font-size-lg: 16px;
+
+  /* Transitions */
+  --tailgrid-transition-fast: 150ms ease;
+  --tailgrid-transition-normal: 200ms ease;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.tailgrid {
+  font-family: var(--tailgrid-font-family);
+  font-size: var(--tailgrid-font-size-md);
+  color: var(--tailgrid-text);
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-lg);
+  overflow: hidden;
+}
+
+.tailgrid-table-wrapper {
+  overflow-x: auto;
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+
+.tailgrid-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.tailgrid-thead {
+  background: var(--tailgrid-bg-hover);
+  border-bottom: 1px solid var(--tailgrid-border);
+}
+
+.tailgrid-header-row {
+  height: 44px;
+}
+
+.tailgrid-th {
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--tailgrid-font-size-sm);
+  color: var(--tailgrid-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  user-select: none;
+}
+
+.tailgrid-th-sortable {
+  cursor: pointer;
+  transition: background-color var(--tailgrid-transition-fast);
+}
+
+.tailgrid-th-sortable:hover {
+  background: var(--tailgrid-border);
+}
+
+.tailgrid-th-content {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+}
+
+.tailgrid-sort-indicator {
+  color: var(--tailgrid-primary);
+  font-weight: 700;
+}
+
+/* ============================================
+   BODY
+   ============================================ */
+
+.tailgrid-tbody {
+  background: var(--tailgrid-bg);
+}
+
+.tailgrid-row {
+  border-bottom: 1px solid var(--tailgrid-border);
+  transition: background-color var(--tailgrid-transition-fast);
+}
+
+.tailgrid-row:last-child {
+  border-bottom: none;
+}
+
+.tailgrid-row:hover {
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-row-selected {
+  background: var(--tailgrid-bg-selected) !important;
+}
+
+.tailgrid-td {
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+
+.tailgrid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tailgrid-spacing-md) var(--tailgrid-spacing-lg);
+  border-bottom: 1px solid var(--tailgrid-border);
+  gap: var(--tailgrid-spacing-md);
+  flex-wrap: wrap;
+}
+
+.tailgrid-toolbar-left,
+.tailgrid-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-sm);
+}
+
+/* Search */
+.tailgrid-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tailgrid-search-icon {
+  position: absolute;
+  left: var(--tailgrid-spacing-sm);
+  color: var(--tailgrid-text-muted);
+  pointer-events: none;
+}
+
+.tailgrid-search-input {
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  padding-left: 32px;
+  padding-right: 32px;
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+  font-size: var(--tailgrid-font-size-sm);
+  width: 220px;
+  transition: border-color var(--tailgrid-transition-fast), box-shadow var(--tailgrid-transition-fast);
+}
+
+.tailgrid-search-input:focus {
+  outline: none;
+  border-color: var(--tailgrid-primary);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+}
+
+.tailgrid-search-clear {
+  position: absolute;
+  right: var(--tailgrid-spacing-sm);
+  padding: 2px;
+  background: transparent;
+  border: none;
+  color: var(--tailgrid-text-muted);
+  cursor: pointer;
+  border-radius: var(--tailgrid-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tailgrid-search-clear:hover {
+  color: var(--tailgrid-text);
+  background: var(--tailgrid-bg-hover);
+}
+
+/* AI Toggle */
+.tailgrid-ai-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+  font-size: var(--tailgrid-font-size-sm);
+  font-weight: 500;
+  color: var(--tailgrid-text-secondary);
+  cursor: pointer;
+  transition: all var(--tailgrid-transition-fast);
+}
+
+.tailgrid-ai-toggle:hover {
+  border-color: var(--tailgrid-primary);
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-ai-toggle-active {
+  background: var(--tailgrid-bg-selected);
+  border-color: var(--tailgrid-primary);
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-shortcut-hint {
+  font-size: var(--tailgrid-font-size-xs);
+  padding: 2px 4px;
+  background: var(--tailgrid-bg-hover);
+  border-radius: var(--tailgrid-radius-sm);
+  font-family: monospace;
+  color: var(--tailgrid-text-muted);
+}
+
+/* Filter Chips */
+.tailgrid-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+  flex-wrap: wrap;
+}
+
+.tailgrid-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--tailgrid-bg-selected);
+  border-radius: var(--tailgrid-radius-md);
+  font-size: var(--tailgrid-font-size-xs);
+}
+
+.tailgrid-filter-chip-label {
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-filter-chip-value {
+  color: var(--tailgrid-text);
+  font-weight: 500;
+}
+
+.tailgrid-clear-filters {
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--tailgrid-error);
+  font-size: var(--tailgrid-font-size-xs);
+  cursor: pointer;
+  border-radius: var(--tailgrid-radius-sm);
+}
+
+.tailgrid-clear-filters:hover {
+  background: rgb(239 68 68 / 0.1);
+}
+
+/* ============================================
+   AI QUERY BAR
+   ============================================ */
+
+.tailgrid-ai-bar {
+  padding: var(--tailgrid-spacing-md) var(--tailgrid-spacing-lg);
+  background: linear-gradient(135deg, rgb(59 130 246 / 0.05), rgb(139 92 246 / 0.05));
+  border-bottom: 1px solid var(--tailgrid-border);
+}
+
+.tailgrid-ai-form {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-sm);
+}
+
+.tailgrid-ai-icon {
+  color: var(--tailgrid-primary);
+  display: flex;
+  align-items: center;
+}
+
+.tailgrid-ai-spinner {
+  animation: tailgrid-spin 1s linear infinite;
+}
+
+@keyframes tailgrid-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tailgrid-ai-input {
+  flex: 1;
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+  font-size: var(--tailgrid-font-size-md);
+  background: var(--tailgrid-bg);
+  transition: border-color var(--tailgrid-transition-fast), box-shadow var(--tailgrid-transition-fast);
+}
+
+.tailgrid-ai-input:focus {
+  outline: none;
+  border-color: var(--tailgrid-primary);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+}
+
+.tailgrid-ai-input-error {
+  border-color: var(--tailgrid-error);
+}
+
+.tailgrid-ai-input-error:focus {
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+}
+
+.tailgrid-ai-clear {
+  padding: 4px;
+  background: transparent;
+  border: none;
+  color: var(--tailgrid-text-muted);
+  cursor: pointer;
+  border-radius: var(--tailgrid-radius-sm);
+  display: flex;
+  align-items: center;
+}
+
+.tailgrid-ai-clear:hover {
+  color: var(--tailgrid-text);
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-ai-submit {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  background: var(--tailgrid-primary);
+  color: white;
+  border: none;
+  border-radius: var(--tailgrid-radius-md);
+  font-size: var(--tailgrid-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--tailgrid-transition-fast);
+}
+
+.tailgrid-ai-submit:hover:not(:disabled) {
+  background: var(--tailgrid-primary-hover);
+}
+
+.tailgrid-ai-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tailgrid-ai-enter-hint {
+  font-size: var(--tailgrid-font-size-xs);
+  opacity: 0.7;
+}
+
+.tailgrid-ai-error {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+  margin-top: var(--tailgrid-spacing-sm);
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  background: rgb(239 68 68 / 0.1);
+  border-radius: var(--tailgrid-radius-md);
+  color: var(--tailgrid-error);
+  font-size: var(--tailgrid-font-size-sm);
+}
+
+.tailgrid-ai-error-dismiss {
+  margin-left: auto;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  color: var(--tailgrid-error);
+  cursor: pointer;
+  border-radius: var(--tailgrid-radius-sm);
+  display: flex;
+}
+
+.tailgrid-ai-error-dismiss:hover {
+  background: rgb(239 68 68 / 0.2);
+}
+
+.tailgrid-ai-success {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-xs);
+  margin-top: var(--tailgrid-spacing-sm);
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  background: rgb(16 185 129 / 0.1);
+  border-radius: var(--tailgrid-radius-md);
+  color: var(--tailgrid-success);
+  font-size: var(--tailgrid-font-size-sm);
+}
+
+.tailgrid-ai-confidence-warning {
+  color: var(--tailgrid-warning);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.tailgrid-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tailgrid-spacing-md) var(--tailgrid-spacing-lg);
+  border-top: 1px solid var(--tailgrid-border);
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-pagination-info {
+  font-size: var(--tailgrid-font-size-sm);
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--tailgrid-spacing-sm);
+}
+
+.tailgrid-pagination-btn {
+  padding: var(--tailgrid-spacing-xs) var(--tailgrid-spacing-sm);
+  min-width: 32px;
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-sm);
+  font-size: var(--tailgrid-font-size-sm);
+  color: var(--tailgrid-text);
+  cursor: pointer;
+  transition: all var(--tailgrid-transition-fast);
+}
+
+.tailgrid-pagination-btn:hover:not(:disabled) {
+  border-color: var(--tailgrid-primary);
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tailgrid-pagination-page {
+  font-size: var(--tailgrid-font-size-sm);
+  color: var(--tailgrid-text-secondary);
+  padding: 0 var(--tailgrid-spacing-sm);
+}
+
+.tailgrid-page-size-select {
+  padding: var(--tailgrid-spacing-xs) var(--tailgrid-spacing-sm);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-sm);
+  font-size: var(--tailgrid-font-size-sm);
+  background: var(--tailgrid-bg);
+  cursor: pointer;
+}
+
+/* ============================================
+   COLUMN RESIZER
+   ============================================ */
+
+.tailgrid-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background: transparent;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  transition: background-color var(--tailgrid-transition-fast);
+}
+
+.tailgrid-resizer:hover {
+  background: var(--tailgrid-primary);
+  opacity: 0.5;
+}
+
+.tailgrid-resizer-active {
+  background: var(--tailgrid-primary);
+  opacity: 1;
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.tailgrid-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tailgrid-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tailgrid-checkbox-visual {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-sm);
+  background: var(--tailgrid-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--tailgrid-transition-fast);
+}
+
+.tailgrid-checkbox:hover .tailgrid-checkbox-visual {
+  border-color: var(--tailgrid-primary);
+}
+
+.tailgrid-checkbox-checked .tailgrid-checkbox-visual,
+.tailgrid-checkbox-indeterminate .tailgrid-checkbox-visual {
+  background: var(--tailgrid-primary);
+  border-color: var(--tailgrid-primary);
+  color: white;
+}
+
+.tailgrid-checkbox-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+
+.tailgrid-loading,
+.tailgrid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tailgrid-spacing-xl) var(--tailgrid-spacing-lg);
+  color: var(--tailgrid-text-secondary);
+  font-size: var(--tailgrid-font-size-md);
+  min-height: 200px;
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+/* ============================================
+   VIRTUALIZATION
+   ============================================ */
+
+.tailgrid-virtualized-container {
+  will-change: transform;
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar-track {
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar-thumb {
+  background: var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+}
+
+.tailgrid-virtualized-container::-webkit-scrollbar-thumb:hover {
+  background: var(--tailgrid-text-muted);
+}
+
+.tailgrid-loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tailgrid-spacing-sm);
+  padding: var(--tailgrid-spacing-md);
+  color: var(--tailgrid-text-secondary);
+  font-size: var(--tailgrid-font-size-sm);
+}
+
+.tailgrid-loading-spinner {
+  animation: tailgrid-spin 1s linear infinite;
+}
+
+.tailgrid-end-of-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tailgrid-spacing-md);
+  color: var(--tailgrid-text-muted);
+  font-size: var(--tailgrid-font-size-sm);
+  border-top: 1px solid var(--tailgrid-border);
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+.tailgrid-dark {
+  --tailgrid-bg: #1f2937;
+  --tailgrid-bg-hover: #374151;
+  --tailgrid-bg-selected: #1e3a5f;
+  --tailgrid-border: #374151;
+  --tailgrid-text: #f9fafb;
+  --tailgrid-text-secondary: #9ca3af;
+  --tailgrid-text-muted: #6b7280;
+}

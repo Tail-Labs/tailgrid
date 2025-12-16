@@ -2,7 +2,7 @@
   "name": "@tailgrid/react",
   "version": "0.0.1",
   "description": "React components for TailGrid - the AI-native data grid",
-  "keywords": ["react", "data-grid", "table", "ai", "tanstack-table", "tailwind"],
+  "keywords": ["react", "data-grid", "table", "ai", "tanstack-table", "tailwind", "virtual-scroll", "infinite-scroll"],
   "homepage": "https://tailgrid.dev",
   "bugs": "https://github.com/Tail-Labs/tailgrid/issues",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "author": "sivatail <hello@taillabs.io>",
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "type": "module",
   "exports": {
     ".": {
@@ -20,12 +20,14 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
-    "./styles.css": "./dist/styles.css"
+    "./themes/default.css": "./src/themes/default.css",
+    "./themes/tailwind.css": "./src/themes/tailwind.css",
+    "./themes/dark.css": "./src/themes/dark.css"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "src/themes", "README.md"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -37,7 +39,8 @@
   },
   "dependencies": {
     "@tailgrid/core": "workspace:*",
-    "@tanstack/react-table": "^8.20.0"
+    "@tanstack/react-table": "^8.20.0",
+    "@tanstack/react-virtual": "^3.10.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -50,5 +53,10 @@
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
+  },
+  "optionalDependencies": {
+    "@tailgrid/ai": "workspace:*",
+    "@radix-ui/react-popover": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0"
   }
 }

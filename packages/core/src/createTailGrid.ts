@@ -82,6 +82,10 @@ export function createTailGrid<TData>(
       columnOrder,
       columnVisibility,
     },
+    onStateChange: () => {
+      // Required by TanStack Table but we handle individual state changes
+    },
+    renderFallbackValue: null,
     onSortingChange: (updater) => {
       sorting = typeof updater === 'function' ? updater(sorting) : updater;
       options.onSortingChange?.(sorting);

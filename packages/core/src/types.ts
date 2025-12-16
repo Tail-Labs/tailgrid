@@ -1,7 +1,5 @@
 import type {
-  ColumnDef,
   SortingState,
-  FilterFn,
   Row,
   Table,
 } from '@tanstack/table-core';
@@ -12,7 +10,18 @@ import type {
 
 export type SortDirection = 'asc' | 'desc';
 
-export interface TailGridColumn<TData> extends Omit<ColumnDef<TData, unknown>, 'id'> {
+/**
+ * TailGrid column definition
+ *
+ * @example
+ * ```ts
+ * const columns: TailGridColumn<User>[] = [
+ *   { id: 'name', header: 'Name', accessorKey: 'name' },
+ *   { id: 'email', header: 'Email', accessorKey: 'email', enableSorting: true },
+ * ];
+ * ```
+ */
+export interface TailGridColumn<TData> {
   /** Unique column identifier */
   id: string;
   /** Column header label */
@@ -35,10 +44,12 @@ export interface TailGridColumn<TData> extends Omit<ColumnDef<TData, unknown>, '
   enableResizing?: boolean;
   /** Column alignment */
   align?: 'left' | 'center' | 'right';
-  /** Custom cell renderer */
+  /** Custom cell renderer (receives TailGrid CellContext) */
   cell?: (props: CellContext<TData>) => unknown;
   /** Column data type (for AI parsing) */
   dataType?: 'string' | 'number' | 'date' | 'boolean' | 'currency';
+  /** Column meta information */
+  meta?: Record<string, unknown>;
 }
 
 export interface CellContext<TData> {
@@ -315,4 +326,153 @@ export interface AIProviderConfig {
   endpoint?: string;
   /** Model name */
   model?: string;
+}
+
+// ============================================
+// AI QUERY BAR CONFIGURATION
+// ============================================
+
+export type AIQueryBarMode = 'visible' | 'toggle' | 'hidden';
+
+export interface AIQueryBarConfig {
+  /** Display mode for the AI query bar */
+  mode: AIQueryBarMode;
+  /** Placeholder text */
+  placeholder?: string;
+  /** Keyboard shortcut (e.g., 'mod+k' for Cmd/Ctrl+K) */
+  shortcut?: string;
+  /** Show suggestions based on column schema */
+  showSuggestions?: boolean;
+  /** Maximum suggestions to display */
+  maxSuggestions?: number;
+}
+
+// ============================================
+// THEME CONFIGURATION
+// ============================================
+
+export type ThemeMode = 'plain' | 'tailwind' | 'unstyled';
+
+export interface ThemeConfig {
+  /** Styling approach */
+  mode: ThemeMode;
+  /** Enable dark mode */
+  darkMode?: boolean;
+  /** Custom CSS class overrides */
+  customClasses?: Partial<TailGridClassNames>;
+}
+
+/** CSS class names for all TailGrid elements */
+export interface TailGridClassNames {
+  /** Root container */
+  container: string;
+  /** Table wrapper */
+  tableWrapper: string;
+  /** Table element */
+  table: string;
+  /** Table header */
+  thead: string;
+  /** Header row */
+  headerRow: string;
+  /** Header cell */
+  th: string;
+  /** Sortable header cell */
+  thSortable: string;
+  /** Sort indicator */
+  sortIndicator: string;
+  /** Table body */
+  tbody: string;
+  /** Body row */
+  row: string;
+  /** Selected row */
+  rowSelected: string;
+  /** Hovered row */
+  rowHover: string;
+  /** Body cell */
+  td: string;
+  /** Toolbar container */
+  toolbar: string;
+  /** Global search input */
+  searchInput: string;
+  /** AI query bar */
+  aiBar: string;
+  /** AI query input */
+  aiInput: string;
+  /** AI loading indicator */
+  aiLoading: string;
+  /** AI error message */
+  aiError: string;
+  /** Pagination container */
+  pagination: string;
+  /** Pagination button */
+  paginationButton: string;
+  /** Pagination info */
+  paginationInfo: string;
+  /** Page size select */
+  pageSizeSelect: string;
+  /** Column resizer handle */
+  resizer: string;
+  /** Column resizer active */
+  resizerActive: string;
+  /** Filter popover */
+  filterPopover: string;
+  /** Filter chip */
+  filterChip: string;
+  /** Checkbox */
+  checkbox: string;
+  /** Checkbox checked */
+  checkboxChecked: string;
+  /** Checkbox indeterminate */
+  checkboxIndeterminate: string;
+  /** Loading overlay */
+  loading: string;
+  /** Empty state */
+  empty: string;
+}
+
+// ============================================
+// ACCESSIBILITY CONFIGURATION
+// ============================================
+
+export interface A11yConfig {
+  /** Enable accessible UI primitives (lazy-loads Radix UI) */
+  enableAccessiblePrimitives?: boolean;
+  /** Announce changes to screen readers */
+  announceChanges?: boolean;
+  /** Enable keyboard navigation */
+  enableKeyboardNavigation?: boolean;
+  /** Custom ARIA labels */
+  ariaLabels?: Partial<TailGridAriaLabels>;
+}
+
+/** ARIA labels for accessibility */
+export interface TailGridAriaLabels {
+  /** Table label */
+  table: string;
+  /** Sort ascending */
+  sortAscending: string;
+  /** Sort descending */
+  sortDescending: string;
+  /** Clear sort */
+  clearSort: string;
+  /** Filter column */
+  filterColumn: string;
+  /** Clear filter */
+  clearFilter: string;
+  /** Select row */
+  selectRow: string;
+  /** Select all rows */
+  selectAllRows: string;
+  /** Go to first page */
+  firstPage: string;
+  /** Go to previous page */
+  previousPage: string;
+  /** Go to next page */
+  nextPage: string;
+  /** Go to last page */
+  lastPage: string;
+  /** AI query bar */
+  aiQueryBar: string;
+  /** Global search */
+  globalSearch: string;
 }
