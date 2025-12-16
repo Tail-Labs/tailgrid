@@ -9,7 +9,7 @@
   },
   "homepage": "https://tailgrid.dev",
   "license": "MIT",
-  "author": "TailLabs <hello@taillabs.io>",
+  "author": "sivatail <hello@taillabs.io>",
   "workspaces": [
     "packages/*",
     "apps/*"

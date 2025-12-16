@@ -11,7 +11,7 @@
     "directory": "packages/ai"
   },
   "license": "MIT",
-  "author": "TailLabs <hello@taillabs.io>",
+  "author": "sivatail <hello@taillabs.io>",
   "sideEffects": false,
   "type": "module",
   "exports": {
