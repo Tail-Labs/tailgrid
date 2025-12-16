@@ -1,0 +1,120 @@
+# TailGrid
+
+Welcome to the TailGrid Storybook! TailGrid is an AI-native data grid component library built on TanStack Table.
+
+## Features
+
+- **AI-Powered Queries**: Natural language filtering and sorting
+- **Multiple Styling Options**: Plain CSS, Tailwind CSS, or CSS-in-JS
+- **Virtual Scrolling**: Handle large datasets with ease
+- **Infinite Scrolling**: Load data as you scroll
+- **Full TypeScript Support**: Complete type safety
+- **Accessible**: WCAG 2.1 compliant with keyboard navigation
+- **Customizable**: Override any component or style
+
+## Installation
+
+```bash
+# npm
+npm install @tailgrid/react
+
+# pnpm
+pnpm add @tailgrid/react
+
+# yarn
+yarn add @tailgrid/react
+```
+
+## Quick Start
+
+```tsx
+import { TailGrid } from '@tailgrid/react';
+import '@tailgrid/react/themes/default.css';
+
+const columns = [
+  { id: 'name', header: 'Name', accessorKey: 'name' },
+  { id: 'email', header: 'Email', accessorKey: 'email' },
+];
+
+const data = [
+  { name: 'John Doe', email: 'john@example.com' },
+  { name: 'Jane Smith', email: 'jane@example.com' },
+];
+
+function App() {
+  return (
+    <TailGrid
+      data={data}
+      columns={columns}
+      enableSorting
+      enablePagination
+    />
+  );
+}
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `@tailgrid/core` | Framework-agnostic core logic |
+| `@tailgrid/react` | React components and hooks |
+| `@tailgrid/ai` | AI query parsing providers |
+
+## Theming
+
+TailGrid supports three styling approaches:
+
+### Plain CSS (Default)
+```tsx
+import '@tailgrid/react/themes/default.css';
+```
+
+### Tailwind CSS
+```tsx
+import '@tailgrid/react/themes/tailwind.css';
+```
+
+### CSS-in-JS / Custom
+```tsx
+<TailGrid
+  classNames={{
+    container: 'my-custom-container',
+    table: 'my-custom-table',
+    // ... override any class
+  }}
+/>
+```
+
+## AI Integration
+
+TailGrid supports multiple AI providers for natural language queries:
+
+```tsx
+import { TailGrid } from '@tailgrid/react';
+import { createOpenAIProvider } from '@tailgrid/ai';
+
+const aiProvider = createOpenAIProvider({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+<TailGrid
+  data={data}
+  columns={columns}
+  enableAI
+  aiProvider={aiProvider}
+  aiQueryBarMode="visible"
+/>
+```
+
+Supported providers:
+- OpenAI (GPT-4, GPT-3.5)
+- Anthropic (Claude)
+- Ollama (Local models)
+- Custom endpoints
+
+## Links
+
+- [GitHub Repository](https://github.com/Tail-Labs/tailgrid)
+- [Documentation](https://tailgrid.dev)
+- [npm Package](https://www.npmjs.com/package/@tailgrid/react)
