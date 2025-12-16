@@ -1,8 +1,14 @@
 {
   "name": "@tailgrid/core",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Framework-agnostic core for TailGrid - sorting, filtering, pagination",
-  "keywords": ["data-grid", "table", "sorting", "filtering", "pagination"],
+  "keywords": [
+    "data-grid",
+    "table",
+    "sorting",
+    "filtering",
+    "pagination"
+  ],
   "homepage": "https://tailgrid.dev",
   "bugs": "https://github.com/Tail-Labs/tailgrid/issues",
   "repository": {
@@ -24,7 +30,10 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

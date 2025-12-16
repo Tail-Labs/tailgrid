@@ -1,8 +1,17 @@
 {
   "name": "@tailgrid/react",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "React components for TailGrid - the AI-native data grid",
-  "keywords": ["react", "data-grid", "table", "ai", "tanstack-table", "tailwind", "virtual-scroll", "infinite-scroll"],
+  "keywords": [
+    "react",
+    "data-grid",
+    "table",
+    "ai",
+    "tanstack-table",
+    "tailwind",
+    "virtual-scroll",
+    "infinite-scroll"
+  ],
   "homepage": "https://tailgrid.dev",
   "bugs": "https://github.com/Tail-Labs/tailgrid/issues",
   "repository": {
@@ -12,7 +21,9 @@
   },
   "license": "MIT",
   "author": "sivatail <hello@taillabs.io>",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -27,7 +38,11 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "src/themes", "README.md"],
+  "files": [
+    "dist",
+    "src/themes",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
