@@ -26,14 +26,14 @@ function App() {
         cell: ({ row }) => (
           <div className="user-cell">
             <div className="avatar">
-              {row.original.name
+              {row.name
                 .split(' ')
-                .map((n) => n[0])
+                .map((n: string) => n[0])
                 .join('')}
             </div>
             <div className="user-info">
-              <span className="user-name">{row.original.name}</span>
-              <span className="user-email">{row.original.email}</span>
+              <span className="user-name">{row.name}</span>
+              <span className="user-email">{row.email}</span>
             </div>
           </div>
         ),
@@ -43,8 +43,8 @@ function App() {
         header: 'Role',
         accessorKey: 'role',
         enableSorting: true,
-        cell: ({ getValue }) => {
-          const role = getValue() as string;
+        cell: ({ value }) => {
+          const role = value as string;
           return <span className={`badge badge-${role}`}>{role}</span>;
         },
       },
@@ -53,8 +53,8 @@ function App() {
         header: 'Status',
         accessorKey: 'status',
         enableSorting: true,
-        cell: ({ getValue }) => {
-          const status = getValue() as string;
+        cell: ({ value }) => {
+          const status = value as string;
           return <span className={`badge badge-${status}`}>{status}</span>;
         },
       },
@@ -81,8 +81,8 @@ function App() {
         header: 'Projects',
         accessorKey: 'projects',
         enableSorting: true,
-        cell: ({ getValue }) => (
-          <span style={{ fontWeight: 500 }}>{getValue() as number}</span>
+        cell: ({ value }) => (
+          <span style={{ fontWeight: 500 }}>{value as number}</span>
         ),
       },
     ],
