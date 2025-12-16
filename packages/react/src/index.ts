@@ -8,6 +8,7 @@ export { AIQueryBar } from './components/AIQueryBar';
 export { SelectionCheckbox } from './components/SelectionCheckbox';
 export { ColumnResizer } from './components/ColumnResizer';
 export { VirtualizedBody } from './components/VirtualizedBody';
+export { ColumnFilter as ColumnFilterDropdown } from './components/ColumnFilter';
 
 // ============================================
 // HOOKS
@@ -16,6 +17,8 @@ export { VirtualizedBody } from './components/VirtualizedBody';
 export { useTailGrid } from './hooks/useTailGrid';
 export { useVirtualization } from './hooks/useVirtualization';
 export { useAIQuery } from './hooks/useAIQuery';
+export { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
+export { useAccessiblePrimitives } from './hooks/useAccessiblePrimitives.js';
 
 // ============================================
 // TYPES

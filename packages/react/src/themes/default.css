@@ -662,6 +662,261 @@
 }
 
 /* ============================================
+   COLUMN FILTER
+   ============================================ */
+
+.tailgrid-column-filter {
+  position: relative;
+  display: inline-flex;
+}
+
+.tailgrid-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: var(--tailgrid-spacing-xs);
+  background: transparent;
+  border: none;
+  border-radius: var(--tailgrid-radius-sm);
+  color: var(--tailgrid-text-muted);
+  cursor: pointer;
+  transition: all var(--tailgrid-transition);
+}
+
+.tailgrid-filter-trigger:hover {
+  background: var(--tailgrid-bg-hover);
+  color: var(--tailgrid-text);
+}
+
+.tailgrid-filter-trigger:focus-visible {
+  outline: 2px solid var(--tailgrid-primary);
+  outline-offset: 2px;
+}
+
+.tailgrid-filter-trigger-active {
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-filter-trigger-active:hover {
+  color: var(--tailgrid-primary);
+}
+
+.tailgrid-filter-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tailgrid-spacing-sm);
+  padding: var(--tailgrid-spacing-md);
+  min-width: 220px;
+}
+
+.tailgrid-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tailgrid-spacing-xs);
+}
+
+.tailgrid-filter-label {
+  font-size: var(--tailgrid-font-size-xs);
+  font-weight: 500;
+  color: var(--tailgrid-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tailgrid-filter-select {
+  width: 100%;
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  font-size: var(--tailgrid-font-size-sm);
+  font-family: inherit;
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+  color: var(--tailgrid-text);
+  cursor: pointer;
+  transition: border-color var(--tailgrid-transition);
+}
+
+.tailgrid-filter-select:hover {
+  border-color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-filter-select:focus {
+  outline: none;
+  border-color: var(--tailgrid-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tailgrid-filter-input {
+  width: 100%;
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  font-size: var(--tailgrid-font-size-sm);
+  font-family: inherit;
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-md);
+  color: var(--tailgrid-text);
+  transition: border-color var(--tailgrid-transition);
+}
+
+.tailgrid-filter-input:hover {
+  border-color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-filter-input:focus {
+  outline: none;
+  border-color: var(--tailgrid-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tailgrid-filter-input::placeholder {
+  color: var(--tailgrid-text-muted);
+}
+
+.tailgrid-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--tailgrid-spacing-sm);
+  margin-top: var(--tailgrid-spacing-sm);
+  padding-top: var(--tailgrid-spacing-sm);
+  border-top: 1px solid var(--tailgrid-border);
+}
+
+.tailgrid-filter-btn {
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  font-size: var(--tailgrid-font-size-sm);
+  font-family: inherit;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--tailgrid-radius-md);
+  cursor: pointer;
+  transition: all var(--tailgrid-transition);
+}
+
+.tailgrid-filter-btn-clear {
+  background: transparent;
+  color: var(--tailgrid-text-secondary);
+}
+
+.tailgrid-filter-btn-clear:hover {
+  background: var(--tailgrid-bg-hover);
+  color: var(--tailgrid-text);
+}
+
+.tailgrid-filter-btn-apply {
+  background: var(--tailgrid-primary);
+  color: white;
+}
+
+.tailgrid-filter-btn-apply:hover {
+  background: var(--tailgrid-primary-hover);
+}
+
+.tailgrid-filter-btn:focus-visible {
+  outline: 2px solid var(--tailgrid-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   KEYBOARD NAVIGATION
+   ============================================ */
+
+.tailgrid-cell-focused {
+  outline: 2px solid var(--tailgrid-primary);
+  outline-offset: -2px;
+}
+
+[data-focused="true"] {
+  outline: 2px solid var(--tailgrid-primary);
+  outline-offset: -2px;
+}
+
+/* ============================================
+   ACCESSIBLE PRIMITIVES FALLBACKS
+   ============================================ */
+
+.tailgrid-popover-root {
+  position: relative;
+  display: inline-block;
+}
+
+.tailgrid-popover-trigger {
+  cursor: pointer;
+}
+
+.tailgrid-popover-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  margin-top: var(--tailgrid-spacing-xs);
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-lg);
+  box-shadow: var(--tailgrid-shadow-lg);
+}
+
+.tailgrid-dropdown-root {
+  position: relative;
+  display: inline-block;
+}
+
+.tailgrid-dropdown-trigger {
+  cursor: pointer;
+}
+
+.tailgrid-dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 160px;
+  margin-top: var(--tailgrid-spacing-xs);
+  padding: var(--tailgrid-spacing-xs);
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-lg);
+  box-shadow: var(--tailgrid-shadow-lg);
+}
+
+.tailgrid-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: var(--tailgrid-spacing-sm) var(--tailgrid-spacing-md);
+  font-size: var(--tailgrid-font-size-sm);
+  color: var(--tailgrid-text);
+  border-radius: var(--tailgrid-radius-md);
+  cursor: pointer;
+  transition: background var(--tailgrid-transition);
+}
+
+.tailgrid-dropdown-item:hover {
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-dropdown-item:focus-visible {
+  outline: none;
+  background: var(--tailgrid-bg-hover);
+}
+
+.tailgrid-dropdown-item.disabled {
+  color: var(--tailgrid-text-muted);
+  cursor: not-allowed;
+}
+
+.tailgrid-dropdown-item.disabled:hover {
+  background: transparent;
+}
+
+.tailgrid-dropdown-separator {
+  height: 1px;
+  margin: var(--tailgrid-spacing-xs) 0;
+  background: var(--tailgrid-border);
+}
+
+/* ============================================
    DARK MODE
    ============================================ */
 
