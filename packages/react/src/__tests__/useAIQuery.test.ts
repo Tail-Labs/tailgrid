@@ -215,12 +215,11 @@ describe('useAIQuery', () => {
       expect(result.current.history.length).toBe(2);
     });
 
-    it('should limit history to maxHistory', async () => {
+    it('should track all queries in history', async () => {
       const { result } = renderHook(() =>
         useAIQuery({
           provider: mockProvider,
           columns: mockColumns,
-          maxHistory: 2,
         })
       );
 
@@ -235,7 +234,7 @@ describe('useAIQuery', () => {
         });
       }
 
-      expect(result.current.history.length).toBe(2);
+      expect(result.current.history.length).toBe(5);
     });
 
     it('should provide clearHistory function', async () => {
