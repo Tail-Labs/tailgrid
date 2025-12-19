@@ -16,7 +16,7 @@ export interface SelectionCheckboxProps {
   /** Disabled state */
   disabled?: boolean;
   /** Change handler */
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   /** Click handler (for stopping propagation) */
   onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
   /** ARIA label */

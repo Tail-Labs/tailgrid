@@ -12,9 +12,11 @@ import type {
   FilterState,
   RowSelection,
   PaginationInfo,
+  GridRow,
+  GridColumn,
+  ColumnFilter,
 } from '@tailgrid/core';
 import type { AIProvider } from '@tailgrid/ai';
-import type { Table } from '@tanstack/react-table';
 
 // ============================================
 // TAILGRID REACT PROPS
@@ -30,6 +32,24 @@ export interface TailGridProps<TData> extends TailGridOptions<TData> {
   classNames?: Partial<TailGridClassNames>;
   /** Theme preset */
   theme?: 'default' | 'dark' | 'none';
+
+  // ─────────────────────────────────────────
+  // Pagination (shortcuts)
+  // ─────────────────────────────────────────
+  /** Initial page size (shorthand for initialPagination.pageSize) */
+  pageSize?: number;
+
+  // ─────────────────────────────────────────
+  // Layout / Sizing
+  // ─────────────────────────────────────────
+  /** Fixed height of the grid (e.g., 500, '500px', '80vh') */
+  height?: number | string;
+  /** Maximum height of the grid */
+  maxHeight?: number | string;
+  /** Minimum height of the grid */
+  minHeight?: number | string;
+  /** Auto-resize to fill available space in parent container */
+  autoResize?: boolean;
 
   // ─────────────────────────────────────────
   // UI State
@@ -105,22 +125,27 @@ export interface TailGridProps<TData> extends TailGridOptions<TData> {
 // ============================================
 
 export interface TailGridRenderContext<TData> {
-  /** TanStack React Table instance */
-  table: Table<TData>;
+  /** Row model from grid engine */
+  rowModel: GridRow<TData>[];
+  /** Column model from grid engine */
+  gridColumns: GridColumn<TData>[];
 
   // Sorting
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
-  toggleSort: (columnId: string) => void;
+  toggleSort: (columnId: string, multi?: boolean) => void;
   clearSorting: () => void;
 
   // Filtering
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
+  columnFilters: ColumnFilter[];
+  setColumnFilter: (columnId: string, value: unknown) => void;
   clearFilters: () => void;
 
   // Pagination
   paginationInfo: PaginationInfo;
+  pagination: { pageIndex: number; pageSize: number };
   setPageIndex: (index: number) => void;
   setPageSize: (size: number) => void;
   nextPage: () => void;
@@ -130,9 +155,20 @@ export interface TailGridRenderContext<TData> {
 
   // Selection
   selectedRows: TData[];
+  rowSelection: RowSelection;
   toggleRowSelection: (rowId: string) => void;
   toggleAllRowsSelection: () => void;
   clearSelection: () => void;
+  getIsAllRowsSelected: () => boolean;
+  getIsSomeRowsSelected: () => boolean;
+
+  // Column sizing
+  columnSizing: Record<string, number>;
+  setColumnSize: (columnId: string, size: number) => void;
+  getColumnSize: (columnId: string) => number;
+  resetColumnSize: (columnId: string) => void;
+  setResizingColumnId: (columnId: string | null) => void;
+  resizingColumnId: string | null;
 
   // Data
   rows: TData[];
@@ -148,15 +184,9 @@ export interface TailGridRenderContext<TData> {
 // HOOK RETURN TYPES
 // ============================================
 
-export interface UseTailGridReturn<TData> extends TailGridRenderContext<TData> {
-  /** Column filters state */
-  columnFilters: Array<{ id: string; value: unknown }>;
-  /** Set column filter */
-  setColumnFilter: (columnId: string, value: unknown) => void;
-  /** Pagination state */
-  pagination: { pageIndex: number; pageSize: number };
-  /** Row selection state */
-  rowSelection: Record<string, boolean>;
+export interface UseTailGridReturn<TData> extends Omit<TailGridRenderContext<TData>, 'aiQuery' | 'aiLoading' | 'aiError'> {
+  /** Column definitions */
+  columnDefs: TailGridColumn<TData>[];
 }
 
 export interface UseAIQueryOptions<TData> {
@@ -264,6 +294,42 @@ export const defaultClassNames: TailGridClassNames = {
   checkboxIndeterminate: 'tailgrid-checkbox-indeterminate',
   loading: 'tailgrid-loading',
   empty: 'tailgrid-empty',
+};
+
+/** Empty class names for theme="none" - allows full custom styling */
+export const emptyClassNames: TailGridClassNames = {
+  container: '',
+  tableWrapper: '',
+  table: '',
+  thead: '',
+  headerRow: '',
+  th: '',
+  thSortable: '',
+  sortIndicator: '',
+  tbody: '',
+  row: '',
+  rowSelected: '',
+  rowHover: '',
+  td: '',
+  toolbar: '',
+  searchInput: '',
+  aiBar: '',
+  aiInput: '',
+  aiLoading: '',
+  aiError: '',
+  pagination: '',
+  paginationButton: '',
+  paginationInfo: '',
+  pageSizeSelect: '',
+  resizer: '',
+  resizerActive: '',
+  filterPopover: '',
+  filterChip: '',
+  checkbox: '',
+  checkboxChecked: '',
+  checkboxIndeterminate: '',
+  loading: '',
+  empty: '',
 };
 
 // ============================================

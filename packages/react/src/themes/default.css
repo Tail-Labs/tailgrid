@@ -104,10 +104,15 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to allow filter popover to show */
   text-overflow: ellipsis;
   position: relative;
   user-select: none;
+  border-right: 1px solid var(--tailgrid-border); /* Column separator */
+}
+
+.tailgrid-th:last-child {
+  border-right: none; /* No border on last column */
 }
 
 .tailgrid-th-sortable {
@@ -161,6 +166,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
+  border-right: 1px solid var(--tailgrid-border); /* Column separator */
+}
+
+.tailgrid-td:last-child {
+  border-right: none; /* No border on last column */
 }
 
 /* ============================================
@@ -668,6 +678,18 @@
 .tailgrid-column-filter {
   position: relative;
   display: inline-flex;
+}
+
+.tailgrid-filter-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  margin-top: var(--tailgrid-spacing-xs);
+  background: var(--tailgrid-bg);
+  border: 1px solid var(--tailgrid-border);
+  border-radius: var(--tailgrid-radius-lg);
+  box-shadow: var(--tailgrid-shadow-md);
 }
 
 .tailgrid-filter-trigger {

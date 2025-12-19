@@ -43,9 +43,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
-  "dependencies": {
-    "@tanstack/table-core": "^8.20.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.10.0",
     "tsup": "^8.0.1",

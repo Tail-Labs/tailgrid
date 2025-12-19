@@ -6,7 +6,14 @@
  *
  * Usage:
  *   import '@tailgrid/react/themes/tailwind.css';
+ *
+ * Tailwind CSS v4 Compatibility:
+ *   This file uses @reference for Tailwind v4 support.
+ *   For Tailwind v3, the @reference directive is ignored.
  */
+
+/* Tailwind CSS v4 compatibility - reference the theme */
+@reference "tailwindcss";
 
 /* ============================================
    CONTAINER

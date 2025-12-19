@@ -1,7 +1,5 @@
-import React, { useCallback, forwardRef } from 'react';
-import { flexRender } from '@tanstack/react-table';
-import type { Table, Row } from '@tanstack/react-table';
-import type { TailGridClassNames, TailGridColumn } from '@tailgrid/core';
+import React, { useCallback } from 'react';
+import type { TailGridClassNames, TailGridColumn, GridRow, GridCell } from '@tailgrid/core';
 import { useVirtualization } from '../hooks/useVirtualization';
 import { SelectionCheckbox } from './SelectionCheckbox';
 import { cx } from '../types';
@@ -11,8 +9,8 @@ import { cx } from '../types';
 // ============================================
 
 export interface VirtualizedBodyProps<TData> {
-  /** TanStack Table instance */
-  table: Table<TData>;
+  /** Row model from grid engine */
+  rowModel: GridRow<TData>[];
   /** Column definitions */
   columns: TailGridColumn<TData>[];
   /** Class names map */
@@ -23,6 +21,8 @@ export interface VirtualizedBodyProps<TData> {
   enableMultiRowSelection?: boolean;
   /** Custom cell renderer */
   renderCell?: (value: unknown, row: TData, column: TailGridColumn<TData>) => React.ReactNode;
+  /** Callback when a row is selected */
+  onRowSelect?: (rowId: string) => void;
   /** Estimated row height */
   rowHeight?: number;
   /** Container height */
@@ -54,11 +54,12 @@ export interface VirtualizedBodyProps<TData> {
  * @example
  * ```tsx
  * <VirtualizedBody
- *   table={table}
+ *   rowModel={rowModel}
  *   columns={columns}
  *   classNames={classNames}
  *   height={500}
  *   rowHeight={48}
+ *   onRowSelect={(rowId) => toggleRowSelection(rowId)}
  *   onLoadMore={fetchNextPage}
  *   hasMore={hasNextPage}
  *   isLoadingMore={isFetching}
@@ -66,12 +67,13 @@ export interface VirtualizedBodyProps<TData> {
  * ```
  */
 export function VirtualizedBody<TData>({
-  table,
+  rowModel,
   columns,
   classNames,
   enableRowSelection,
   enableMultiRowSelection = true,
   renderCell,
+  onRowSelect,
   rowHeight = 48,
   height = 500,
   overscan = 10,
@@ -80,18 +82,16 @@ export function VirtualizedBody<TData>({
   hasMore = false,
   ariaLabels,
 }: VirtualizedBodyProps<TData>) {
-  const rows = table.getRowModel().rows;
-
   const {
     containerRef,
     virtualItems,
     totalSize,
     measureElement,
   } = useVirtualization({
-    count: rows.length,
+    count: rowModel.length,
     estimateSize: rowHeight,
     overscan,
-    getItemKey: (index) => rows[index]?.id ?? index,
+    getItemKey: (index) => rowModel[index]?.id ?? index,
     onLoadMore,
     isLoadingMore,
     hasMore,
@@ -100,7 +100,7 @@ export function VirtualizedBody<TData>({
 
   // Render a single row
   const renderRow = useCallback(
-    (row: Row<TData>, virtualRow: { index: number; start: number; size: number }) => {
+    (row: GridRow<TData>, virtualRow: { index: number; start: number; size: number }) => {
       return (
         <tr
           key={row.id}
@@ -108,10 +108,10 @@ export function VirtualizedBody<TData>({
           data-index={virtualRow.index}
           className={cx(
             classNames.row,
-            row.getIsSelected() && classNames.rowSelected
+            row.isSelected && classNames.rowSelected
           )}
-          onClick={enableRowSelection ? () => row.toggleSelected() : undefined}
-          data-selected={row.getIsSelected()}
+          onClick={enableRowSelection && onRowSelect ? () => onRowSelect(row.id) : undefined}
+          data-selected={row.isSelected}
           style={{
             position: 'absolute',
             top: 0,
@@ -126,30 +126,31 @@ export function VirtualizedBody<TData>({
             <td className={classNames.td} style={{ width: 40 }}>
               <SelectionCheckbox
                 classNames={classNames}
-                checked={row.getIsSelected()}
-                disabled={!row.getCanSelect()}
-                onChange={row.getToggleSelectedHandler()}
+                checked={row.isSelected}
+                disabled={!row.canSelect}
+                onChange={onRowSelect ? () => onRowSelect(row.id) : undefined}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={ariaLabels?.selectRow || 'Select row'}
               />
             </td>
           )}
 
-          {row.getVisibleCells().map((cell) => {
-            const column = columns.find((c) => c.id === cell.column.id);
+          {row.getVisibleCells().map((cell: GridCell<TData>) => {
+            const columnDef = cell.column;
             return (
               <td
                 key={cell.id}
                 className={classNames.td}
                 style={{
-                  textAlign: column?.align || 'left',
-                  width: cell.column.getSize(),
+                  textAlign: columnDef?.align || 'left',
                 }}
               >
-                {renderCell && column ? (
-                  renderCell(cell.getValue(), row.original, column)
+                {renderCell && columnDef ? (
+                  renderCell(cell.value, row.original, columnDef)
+                ) : columnDef.cell ? (
+                  columnDef.cell({ value: cell.value, row: row.original, column: columnDef, rowIndex: row.index }) as React.ReactNode
                 ) : (
-                  flexRender(cell.column.columnDef.cell, cell.getContext())
+                  String(cell.value ?? '')
                 )}
               </td>
             );
@@ -157,7 +158,7 @@ export function VirtualizedBody<TData>({
         </tr>
       );
     },
-    [classNames, columns, enableRowSelection, renderCell, ariaLabels, measureElement]
+    [classNames, enableRowSelection, renderCell, ariaLabels, measureElement, onRowSelect]
   );
 
   return (
@@ -180,7 +181,7 @@ export function VirtualizedBody<TData>({
       >
         <tbody className={classNames.tbody}>
           {virtualItems.map((virtualRow) => {
-            const row = rows[virtualRow.index];
+            const row = rowModel[virtualRow.index];
             if (!row) return null;
             return renderRow(row, virtualRow);
           })}
@@ -209,7 +210,7 @@ export function VirtualizedBody<TData>({
       )}
 
       {/* End of data indicator */}
-      {!hasMore && rows.length > 0 && (
+      {!hasMore && rowModel.length > 0 && (
         <div className="tailgrid-end-of-data">
           No more data to load
         </div>

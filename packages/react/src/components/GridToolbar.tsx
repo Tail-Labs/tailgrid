@@ -56,7 +56,7 @@ export function GridToolbar<TData>({
   classNames,
   globalFilter,
   onGlobalFilterChange,
-  enableGlobalFilter = true,
+  enableGlobalFilter = false,
   enableAI = false,
   aiQueryBarMode = 'hidden',
   showAiBar = false,

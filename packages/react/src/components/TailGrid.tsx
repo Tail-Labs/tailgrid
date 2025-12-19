@@ -1,13 +1,13 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { flexRender } from '@tanstack/react-table';
 import { useTailGrid } from '../hooks/useTailGrid';
 import { GridToolbar } from './GridToolbar';
 import { AIQueryBar } from './AIQueryBar';
 import { SelectionCheckbox } from './SelectionCheckbox';
 import { ColumnResizer } from './ColumnResizer';
+import { ColumnFilter } from './ColumnFilter';
 import type { TailGridProps, TailGridRenderContext } from '../types';
-import { defaultClassNames, mergeClassNames, cx } from '../types';
-import type { TailGridColumn } from '@tailgrid/core';
+import { defaultClassNames, emptyClassNames, mergeClassNames, cx } from '../types';
+import type { TailGridColumn, ColumnFilter as ColumnFilterType, GridColumn, GridRow } from '@tailgrid/core';
 
 // ============================================
 // MAIN COMPONENT
@@ -43,6 +43,15 @@ export function TailGrid<TData>({
   classNames: customClassNames,
   theme = 'default',
 
+  // Pagination shortcuts
+  pageSize,
+
+  // Layout / Sizing
+  height,
+  maxHeight,
+  minHeight,
+  autoResize = false,
+
   // UI State
   loading = false,
   emptyMessage = 'No data available',
@@ -70,15 +79,32 @@ export function TailGrid<TData>({
   // Core options passed to useTailGrid
   ...options
 }: TailGridProps<TData>) {
-  // Merge class names
+  // Merge class names - use emptyClassNames as base for theme="none"
   const classNamesMap = useMemo(
-    () => mergeClassNames(defaultClassNames, customClassNames),
-    [customClassNames]
+    () => {
+      const baseClassNames = theme === 'none' ? emptyClassNames : defaultClassNames;
+      return mergeClassNames(baseClassNames, customClassNames);
+    },
+    [customClassNames, theme]
   );
 
+  // Determine if toolbar should be shown
+  const showToolbar = options.enableGlobalFilter || options.enableAI || options.enableFiltering;
+
+  // Merge pageSize shortcut with initialPagination if provided
+  const gridOptions = useMemo(() => {
+    if (pageSize && !options.initialPagination) {
+      return {
+        ...options,
+        initialPagination: { pageIndex: 0, pageSize },
+      };
+    }
+    return options;
+  }, [options, pageSize]);
+
   // Get grid instance from hook
-  const grid = useTailGrid(options);
-  const { table, rows, paginationInfo, globalFilter, setGlobalFilter } = grid;
+  const grid = useTailGrid(gridOptions);
+  const { rows, rowModel, columns, paginationInfo, globalFilter, setGlobalFilter } = grid;
 
   // AI state
   const [aiLoading, setAiLoading] = useState(false);
@@ -135,12 +161,13 @@ export function TailGrid<TData>({
   const renderContext: TailGridRenderContext<TData> = useMemo(
     () => ({
       ...grid,
-      columns: options.columns,
-      aiQuery: options.enableAI && aiProvider ? handleAIQuery : undefined,
+      gridColumns: columns,
+      columns: gridOptions.columns,
+      aiQuery: gridOptions.enableAI && aiProvider ? handleAIQuery : undefined,
       aiLoading,
       aiError,
     }),
-    [grid, options.columns, options.enableAI, aiProvider, handleAIQuery, aiLoading, aiError]
+    [grid, columns, gridOptions.columns, gridOptions.enableAI, aiProvider, handleAIQuery, aiLoading, aiError]
   );
 
   // Toggle AI bar visibility (for toggle mode)
@@ -178,13 +205,35 @@ export function TailGrid<TData>({
   const containerClass = cx(
     classNamesMap.container,
     theme === 'dark' && 'tailgrid-dark',
+    autoResize && 'tailgrid-auto-resize',
     className
   );
+
+  // Container style for sizing
+  const containerStyle: React.CSSProperties = useMemo(() => {
+    const style: React.CSSProperties = {};
+    if (height) {
+      style.height = typeof height === 'number' ? `${height}px` : height;
+    }
+    if (maxHeight) {
+      style.maxHeight = typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight;
+      style.overflow = 'auto';
+    }
+    if (minHeight) {
+      style.minHeight = typeof minHeight === 'number' ? `${minHeight}px` : minHeight;
+    }
+    if (autoResize) {
+      style.height = '100%';
+      style.display = 'flex';
+      style.flexDirection = 'column';
+    }
+    return style;
+  }, [height, maxHeight, minHeight, autoResize]);
 
   // Render loading state
   if (loading) {
     return (
-      <div className={containerClass}>
+      <div className={containerClass} style={containerStyle}>
         {renderLoading ? (
           renderLoading()
         ) : (
@@ -195,11 +244,11 @@ export function TailGrid<TData>({
   }
 
   return (
-    <div className={containerClass}>
-      {/* Toolbar */}
+    <div className={containerClass} style={containerStyle}>
+      {/* Toolbar - only render if explicitly enabled or custom renderer provided */}
       {renderToolbar ? (
         renderToolbar(renderContext)
-      ) : (
+      ) : showToolbar ? (
         <GridToolbar
           classNames={classNamesMap}
           globalFilter={globalFilter}
@@ -213,7 +262,7 @@ export function TailGrid<TData>({
           columnFilters={grid.columnFilters}
           onClearFilters={grid.clearFilters}
         />
-      )}
+      ) : null}
 
       {/* AI Query Bar */}
       {options.enableAI && aiProvider && (showAiBar || aiQueryBarMode === 'visible') && (
@@ -228,7 +277,10 @@ export function TailGrid<TData>({
       )}
 
       {/* Table */}
-      <div className={classNamesMap.tableWrapper}>
+      <div
+        className={classNamesMap.tableWrapper}
+        style={autoResize || height || maxHeight ? { flex: 1, overflow: 'auto' } : undefined}
+      >
         {rows.length === 0 ? (
           renderEmpty ? (
             renderEmpty()
@@ -238,98 +290,117 @@ export function TailGrid<TData>({
         ) : (
           <table className={classNamesMap.table}>
             <thead className={classNamesMap.thead}>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className={classNamesMap.headerRow}>
-                  {/* Selection checkbox column */}
-                  {options.enableRowSelection && (
-                    <th className={classNamesMap.th} style={{ width: 40 }}>
-                      {options.enableMultiRowSelection !== false && (
-                        <SelectionCheckbox
+              <tr className={classNamesMap.headerRow}>
+                {/* Selection checkbox column */}
+                {options.enableRowSelection && (
+                  <th className={classNamesMap.th} style={{ width: 40 }}>
+                    {options.enableMultiRowSelection !== false && (
+                      <SelectionCheckbox
+                        classNames={classNamesMap}
+                        checked={grid.getIsAllRowsSelected()}
+                        indeterminate={grid.getIsSomeRowsSelected()}
+                        onChange={() => grid.toggleAllRowsSelection()}
+                        aria-label={a11yConfig?.ariaLabels?.selectAllRows || 'Select all rows'}
+                      />
+                    )}
+                  </th>
+                )}
+
+                {columns.map((column) => {
+                  const columnDef = column.columnDef;
+                  const canSort = column.canSort;
+                  const sortDirection = column.isSorted;
+
+                  return (
+                    <th
+                      key={column.id}
+                      className={cx(
+                        classNamesMap.th,
+                        canSort && classNamesMap.thSortable
+                      )}
+                      style={{ width: column.size, position: 'relative' }}
+                      onClick={canSort ? () => grid.toggleSort(column.id) : undefined}
+                      aria-sort={
+                        sortDirection === 'asc'
+                          ? 'ascending'
+                          : sortDirection === 'desc'
+                          ? 'descending'
+                          : 'none'
+                      }
+                    >
+                      {renderHeaderCell && columnDef ? (
+                        renderHeaderCell(columnDef)
+                      ) : (
+                        <div className="tailgrid-th-content">
+                          {columnDef.header}
+                          {sortDirection && (
+                            <span className={classNamesMap.sortIndicator}>
+                              {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                            </span>
+                          )}
+                          {/* Column Filter */}
+                          {options.enableFiltering && columnDef?.enableFiltering !== false && (
+                            <span onClick={(e) => e.stopPropagation()}>
+                              <ColumnFilter
+                                column={columnDef}
+                                filter={grid.columnFilters.find((f) => f.id === column.id) as ColumnFilterType | undefined}
+                                onFilterChange={(filter) => {
+                                  if (filter) {
+                                    grid.setColumnFilter(column.id, filter.value);
+                                  } else {
+                                    grid.setColumnFilter(column.id, undefined);
+                                  }
+                                }}
+                                classNames={classNamesMap}
+                              />
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Column Resizer */}
+                      {options.enableColumnResizing && columnDef?.enableResizing !== false && (
+                        <ColumnResizer
                           classNames={classNamesMap}
-                          checked={table.getIsAllRowsSelected()}
-                          indeterminate={table.getIsSomeRowsSelected()}
-                          onChange={table.getToggleAllRowsSelectedHandler()}
-                          aria-label={a11yConfig?.ariaLabels?.selectAllRows || 'Select all rows'}
+                          columnId={column.id}
+                          columnDef={columnDef}
+                          size={column.size}
+                          isResizing={column.isResizing}
+                          onResize={(size) => grid.setColumnSize(column.id, size)}
+                          onResizeStart={() => grid.setResizingColumnId(column.id)}
+                          onResizeEnd={() => grid.setResizingColumnId(null)}
+                          onResetSize={() => grid.resetColumnSize(column.id)}
                         />
                       )}
                     </th>
-                  )}
-
-                  {headerGroup.headers.map((header) => {
-                    const column = options.columns.find((c) => c.id === header.id);
-                    const canSort = header.column.getCanSort();
-                    const sortDirection = header.column.getIsSorted();
-
-                    return (
-                      <th
-                        key={header.id}
-                        className={cx(
-                          classNamesMap.th,
-                          canSort && classNamesMap.thSortable
-                        )}
-                        style={{ width: header.getSize(), position: 'relative' }}
-                        onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                        aria-sort={
-                          sortDirection === 'asc'
-                            ? 'ascending'
-                            : sortDirection === 'desc'
-                            ? 'descending'
-                            : 'none'
-                        }
-                      >
-                        {renderHeaderCell && column ? (
-                          renderHeaderCell(column)
-                        ) : (
-                          <div className="tailgrid-th-content">
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(header.column.columnDef.header, header.getContext())}
-                            {sortDirection && (
-                              <span className={classNamesMap.sortIndicator}>
-                                {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Column Resizer */}
-                        {options.enableColumnResizing && column?.enableResizing !== false && (
-                          <ColumnResizer
-                            classNames={classNamesMap}
-                            header={header}
-                            table={table}
-                          />
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
+                  );
+                })}
+              </tr>
             </thead>
 
             <tbody className={classNamesMap.tbody}>
-              {table.getRowModel().rows.map((row) => (
+              {rowModel.map((row) => (
                 <tr
                   key={row.id}
                   className={cx(
                     classNamesMap.row,
-                    row.getIsSelected() && classNamesMap.rowSelected
+                    row.isSelected && classNamesMap.rowSelected
                   )}
                   onClick={
                     options.enableRowSelection
-                      ? () => row.toggleSelected()
+                      ? () => grid.toggleRowSelection(row.id)
                       : undefined
                   }
-                  data-selected={row.getIsSelected()}
+                  data-selected={row.isSelected}
                 >
                   {/* Selection checkbox */}
                   {options.enableRowSelection && (
                     <td className={classNamesMap.td}>
                       <SelectionCheckbox
                         classNames={classNamesMap}
-                        checked={row.getIsSelected()}
-                        disabled={!row.getCanSelect()}
-                        onChange={row.getToggleSelectedHandler()}
+                        checked={row.isSelected}
+                        disabled={!row.canSelect}
+                        onChange={() => grid.toggleRowSelection(row.id)}
                         onClick={(e) => e.stopPropagation()}
                         aria-label={a11yConfig?.ariaLabels?.selectRow || 'Select row'}
                       />
@@ -337,19 +408,21 @@ export function TailGrid<TData>({
                   )}
 
                   {row.getVisibleCells().map((cell) => {
-                    const column = options.columns.find((c) => c.id === cell.column.id);
+                    const columnDef = cell.column;
                     return (
                       <td
                         key={cell.id}
                         className={classNamesMap.td}
                         style={{
-                          textAlign: column?.align || 'left',
+                          textAlign: columnDef?.align || 'left',
                         }}
                       >
-                        {renderCell && column ? (
-                          renderCell(cell.getValue(), row.original, column)
+                        {renderCell && columnDef ? (
+                          renderCell(cell.value, row.original, columnDef)
+                        ) : columnDef.cell ? (
+                          columnDef.cell({ value: cell.value, row: row.original, column: columnDef, rowIndex: row.index }) as React.ReactNode
                         ) : (
-                          flexRender(cell.column.columnDef.cell, cell.getContext())
+                          String(cell.value ?? '')
                         )}
                       </td>
                     );

@@ -1,30 +1,14 @@
-import {
-  createTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  type Table,
-  type SortingState,
-  type ColumnFiltersState,
-  type PaginationState as TanStackPaginationState,
-  type RowSelectionState,
-} from '@tanstack/table-core';
-
+import { GridEngine } from './engine';
 import type {
   TailGridOptions,
   TailGridInstance,
-  TailGridColumn,
   FilterState,
-  ColumnFilter,
-  PaginationState,
   PaginationInfo,
-  RowSelection,
-  SortConfig,
+  SortingState,
 } from './types';
 
 /**
- * Create a TailGrid instance
+ * Create a TailGrid instance (framework-agnostic)
  *
  * @example
  * ```ts
@@ -43,196 +27,147 @@ import type {
 export function createTailGrid<TData>(
   options: TailGridOptions<TData>
 ): TailGridInstance<TData> {
-  // Initialize state
-  let sorting: SortingState = options.initialSorting ?? [];
-  let columnFilters: ColumnFiltersState = [];
-  let globalFilter = '';
-  let pagination: TanStackPaginationState = {
-    pageIndex: options.initialPagination?.pageIndex ?? 0,
-    pageSize: options.initialPagination?.pageSize ?? 10,
-  };
-  let rowSelection: RowSelectionState = options.initialRowSelection ?? {};
-  let columnOrder: string[] = options.columns.map((col) => col.id);
-  let columnVisibility: Record<string, boolean> = {};
-
-  // Convert TailGrid columns to TanStack columns
-  const tanstackColumns = options.columns.map((col) => ({
-    id: col.id,
-    header: col.header,
-    accessorKey: col.accessorKey,
-    accessorFn: col.accessorFn,
-    enableSorting: col.enableSorting ?? options.enableSorting ?? true,
-    enableColumnFilter: col.enableFiltering ?? options.enableFiltering ?? true,
-    size: col.width,
-    minSize: col.minWidth ?? 50,
-    maxSize: col.maxWidth ?? 500,
-    enableResizing: col.enableResizing ?? options.enableColumnResizing ?? true,
-  }));
-
-  // Create TanStack Table instance
-  const table = createTable({
+  // Create the grid engine
+  const engine = new GridEngine<TData>({
     data: options.data,
-    columns: tanstackColumns,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      pagination,
-      rowSelection,
-      columnOrder,
-      columnVisibility,
+    columns: options.columns,
+    initialSorting: options.initialSorting,
+    initialColumnFilters: options.initialFilters?.columnFilters,
+    initialGlobalFilter: options.initialFilters?.globalFilter,
+    initialPagination: options.initialPagination ?? {
+      pageIndex: 0,
+      pageSize: 10,
     },
-    onStateChange: () => {
-      // Required by TanStack Table but we handle individual state changes
-    },
-    renderFallbackValue: null,
-    onSortingChange: (updater) => {
-      sorting = typeof updater === 'function' ? updater(sorting) : updater;
-      options.onSortingChange?.(sorting);
-    },
-    onColumnFiltersChange: (updater) => {
-      columnFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
-      const filterState = convertToFilterState(columnFilters, globalFilter);
-      options.onFiltersChange?.(filterState);
-    },
-    onGlobalFilterChange: (updater) => {
-      globalFilter = typeof updater === 'function' ? updater(globalFilter) : updater;
-      const filterState = convertToFilterState(columnFilters, globalFilter);
-      options.onFiltersChange?.(filterState);
-    },
-    onPaginationChange: (updater) => {
-      pagination = typeof updater === 'function' ? updater(pagination) : updater;
-      options.onPaginationChange?.({
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-      });
-    },
-    onRowSelectionChange: (updater) => {
-      rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
-      options.onRowSelectionChange?.(rowSelection);
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: options.enableSorting ? getSortedRowModel() : undefined,
-    getFilteredRowModel: options.enableFiltering ? getFilteredRowModel() : undefined,
-    getPaginationRowModel: options.enablePagination ? getPaginationRowModel() : undefined,
+    initialRowSelection: options.initialRowSelection,
+    enableSorting: options.enableSorting,
+    enableFiltering: options.enableFiltering,
+    enablePagination: options.enablePagination,
     enableRowSelection: options.enableRowSelection,
-    enableMultiRowSelection: options.enableMultiRowSelection ?? true,
+    enableMultiRowSelection: options.enableMultiRowSelection,
     getRowId: options.getRowId,
   });
 
-  // Helper to convert column filters to FilterState
-  function convertToFilterState(
-    filters: ColumnFiltersState,
-    global: string
-  ): FilterState {
-    return {
-      columnFilters: filters.map((f) => ({
-        id: f.id,
-        operator: 'contains' as const,
-        value: f.value,
-      })),
-      globalFilter: global || undefined,
-    };
-  }
+  // Track column order and visibility
+  let columnOrder: string[] = options.columns.map((col) => col.id);
+  let columnVisibility: Record<string, boolean> = {};
 
   // Return TailGrid instance
   const instance: TailGridInstance<TData> = {
     // Row getters
     getRows: () => options.data,
-    getFilteredRows: () => table.getFilteredRowModel().rows.map((r) => r.original),
-    getSortedRows: () => table.getSortedRowModel().rows.map((r) => r.original),
-    getPaginatedRows: () => table.getRowModel().rows.map((r) => r.original),
+    getFilteredRows: () => engine.getFilteredRows(),
+    getSortedRows: () => engine.getSortedRows(),
+    getPaginatedRows: () => engine.getPaginatedRows(),
 
     // Sorting
-    getSorting: () => sorting,
-    setSorting: (newSorting) => {
-      sorting = newSorting;
-      table.setSorting(newSorting);
+    getSorting: () => engine.getSorting(),
+    setSorting: (newSorting: SortingState) => {
+      engine.setSorting(newSorting);
+      options.onSortingChange?.(newSorting);
     },
-    toggleSort: (columnId, desc) => {
-      const column = table.getColumn(columnId);
-      if (column) {
-        column.toggleSorting(desc);
+    toggleSort: (columnId: string, desc?: boolean) => {
+      if (desc !== undefined) {
+        // Set explicit direction
+        const currentSorting = [...engine.getSorting()];
+        const existingIndex = currentSorting.findIndex((s) => s.id === columnId);
+        if (existingIndex >= 0) {
+          const existing = currentSorting[existingIndex];
+          if (existing) {
+            existing.desc = desc;
+          }
+        } else {
+          currentSorting.push({ id: columnId, desc });
+        }
+        engine.setSorting(currentSorting);
+      } else {
+        engine.toggleSort(columnId, false);
       }
+      options.onSortingChange?.(engine.getSorting());
     },
     clearSorting: () => {
-      sorting = [];
-      table.resetSorting();
+      engine.clearSorting();
+      options.onSortingChange?.([]);
     },
 
     // Filtering
-    getFilters: () => convertToFilterState(columnFilters, globalFilter),
+    getFilters: (): FilterState => ({
+      columnFilters: engine.getColumnFilters(),
+      globalFilter: engine.getGlobalFilter() || undefined,
+    }),
     setColumnFilter: (filter) => {
-      const column = table.getColumn(filter.id);
-      if (column) {
-        column.setFilterValue(filter.value);
-      }
+      engine.setColumnFilter(filter.id, filter.value);
+      options.onFiltersChange?.({
+        columnFilters: engine.getColumnFilters(),
+        globalFilter: engine.getGlobalFilter() || undefined,
+      });
     },
     removeColumnFilter: (columnId) => {
-      const column = table.getColumn(columnId);
-      if (column) {
-        column.setFilterValue(undefined);
-      }
+      engine.setColumnFilter(columnId, undefined);
+      options.onFiltersChange?.({
+        columnFilters: engine.getColumnFilters(),
+        globalFilter: engine.getGlobalFilter() || undefined,
+      });
     },
     setGlobalFilter: (value) => {
-      globalFilter = value;
-      table.setGlobalFilter(value);
+      engine.setGlobalFilter(value);
+      options.onFiltersChange?.({
+        columnFilters: engine.getColumnFilters(),
+        globalFilter: value || undefined,
+      });
     },
     clearFilters: () => {
-      columnFilters = [];
-      globalFilter = '';
-      table.resetColumnFilters();
-      table.resetGlobalFilter();
+      engine.clearFilters();
+      options.onFiltersChange?.({ columnFilters: [], globalFilter: undefined });
     },
 
     // Pagination
-    getPaginationInfo: (): PaginationInfo => {
-      const pageCount = table.getPageCount();
-      return {
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-        pageCount,
-        totalRows: table.getFilteredRowModel().rows.length,
-        canPreviousPage: table.getCanPreviousPage(),
-        canNextPage: table.getCanNextPage(),
-      };
-    },
+    getPaginationInfo: (): PaginationInfo => engine.getPaginationInfo(),
     setPageIndex: (index) => {
-      pagination.pageIndex = index;
-      table.setPageIndex(index);
+      engine.setPageIndex(index);
+      options.onPaginationChange?.(engine.getPagination());
     },
     setPageSize: (size) => {
-      pagination.pageSize = size;
-      table.setPageSize(size);
+      engine.setPageSize(size);
+      options.onPaginationChange?.(engine.getPagination());
     },
-    firstPage: () => table.firstPage(),
-    previousPage: () => table.previousPage(),
-    nextPage: () => table.nextPage(),
-    lastPage: () => table.lastPage(),
+    firstPage: () => {
+      engine.firstPage();
+      options.onPaginationChange?.(engine.getPagination());
+    },
+    previousPage: () => {
+      engine.previousPage();
+      options.onPaginationChange?.(engine.getPagination());
+    },
+    nextPage: () => {
+      engine.nextPage();
+      options.onPaginationChange?.(engine.getPagination());
+    },
+    lastPage: () => {
+      engine.lastPage();
+      options.onPaginationChange?.(engine.getPagination());
+    },
 
     // Selection
-    getSelectedRowIds: () => Object.keys(rowSelection).filter((id) => rowSelection[id]),
-    getSelectedRows: () => {
-      return table
-        .getSelectedRowModel()
-        .rows.map((r) => r.original);
+    getSelectedRowIds: () => {
+      const selection = engine.getRowSelection();
+      return Object.keys(selection).filter((id) => selection[id]);
     },
+    getSelectedRows: () => engine.getSelectedRows(),
     toggleRowSelection: (rowId) => {
-      const row = table.getRow(rowId);
-      if (row) {
-        row.toggleSelected();
-      }
+      engine.toggleRowSelection(rowId);
+      options.onRowSelectionChange?.(engine.getRowSelection());
     },
     toggleAllRowsSelection: () => {
-      table.toggleAllRowsSelected();
+      engine.toggleAllRowsSelection();
+      options.onRowSelectionChange?.(engine.getRowSelection());
     },
     setRowSelection: (selection) => {
-      rowSelection = selection;
-      table.setRowSelection(selection);
+      engine.setRowSelection(selection);
+      options.onRowSelectionChange?.(selection);
     },
     clearSelection: () => {
-      rowSelection = {};
-      table.resetRowSelection();
+      engine.clearSelection();
+      options.onRowSelectionChange?.({});
     },
 
     // Columns
@@ -242,15 +177,13 @@ export function createTailGrid<TData>(
     },
     toggleColumnVisibility: (columnId) => {
       columnVisibility[columnId] = !columnVisibility[columnId];
-      table.setColumnVisibility(columnVisibility);
     },
     reorderColumns: (newOrder) => {
       columnOrder = newOrder;
-      table.setColumnOrder(newOrder);
     },
 
-    // Internal
-    _table: table,
+    // Internal - expose the engine for advanced usage
+    _engine: engine,
   };
 
   return instance;

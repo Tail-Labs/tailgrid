@@ -1,8 +1,4 @@
-import type {
-  SortingState,
-  Row,
-  Table,
-} from '@tanstack/table-core';
+import type { GridEngine } from './engine';
 
 // ============================================
 // CORE TYPES
@@ -74,7 +70,8 @@ export interface SortConfig {
   desc: boolean;
 }
 
-export type { SortingState };
+/** Sorting state type */
+export type SortingState = Array<{ id: string; desc: boolean }>;
 
 // ============================================
 // FILTERING TYPES
@@ -155,14 +152,94 @@ export interface SelectionState {
 }
 
 // ============================================
+// REMOTE DATA TYPES
+// ============================================
+
+/**
+ * Simple configuration for remote data loading
+ *
+ * @example
+ * ```tsx
+ * // Basic remote pagination
+ * <TailGrid
+ *   remote={{
+ *     url: 'https://api.example.com/users',
+ *     pageSize: 20,
+ *   }}
+ *   columns={columns}
+ * />
+ *
+ * // With custom field mapping
+ * <TailGrid
+ *   remote={{
+ *     url: 'https://api.example.com/users',
+ *     pageSize: 10,
+ *     responseDataKey: 'results',
+ *     responseTotalKey: 'total',
+ *   }}
+ *   columns={columns}
+ * />
+ * ```
+ */
+export interface RemoteDataConfig {
+  /** API URL (required) */
+  url: string;
+  /** Page size (default: 10) */
+  pageSize?: number;
+  /** HTTP method (default: 'GET') */
+  method?: 'GET' | 'POST';
+  /** Additional headers */
+  headers?: Record<string, string>;
+  /** Key in response containing data array (default: 'data') */
+  responseDataKey?: string;
+  /** Key in response containing total count (default: 'total') */
+  responseTotalKey?: string;
+  /** Query parameter name for page (default: 'page') */
+  pageParam?: string;
+  /** Query parameter name for page size (default: 'pageSize') */
+  pageSizeParam?: string;
+  /** Query parameter name for sorting (default: 'sort') */
+  sortParam?: string;
+  /** Query parameter name for filters (default: 'filter') */
+  filterParam?: string;
+  /** Query parameter name for search (default: 'search') */
+  searchParam?: string;
+  /** Transform the request before sending */
+  transformRequest?: (params: RemoteRequestParams) => Record<string, unknown>;
+  /** Transform the response after receiving */
+  transformResponse?: <T>(response: unknown) => { data: T[]; total: number };
+  /** Debounce delay for filtering/search in ms (default: 300) */
+  debounceMs?: number;
+}
+
+export interface RemoteRequestParams {
+  page: number;
+  pageSize: number;
+  sorting?: SortingState;
+  filters?: ColumnFilter[];
+  globalFilter?: string;
+}
+
+export interface RemoteDataState {
+  /** Is data loading */
+  loading: boolean;
+  /** Error message if any */
+  error: string | null;
+  /** Total number of records (from server) */
+  totalRows: number;
+}
+
+// ============================================
 // MAIN GRID OPTIONS
 // ============================================
 
 export interface TailGridOptions<TData> {
-  /** Data array */
+  /** Data array (for local data) */
   data: TData[];
   /** Column definitions */
   columns: TailGridColumn<TData>[];
+  /** Remote data configuration (optional - use instead of `data` for server-side) */
+  remote?: RemoteDataConfig;
 
   // Sorting
   /** Enable sorting */
@@ -295,9 +372,9 @@ export interface TailGridInstance<TData> {
   /** Reorder columns */
   reorderColumns: (columnIds: string[]) => void;
 
-  // Internal TanStack table instance
-  /** @internal TanStack Table instance */
-  _table: Table<TData>;
+  // Internal grid engine instance
+  /** @internal GridEngine instance */
+  _engine: GridEngine<TData>;
 }
 
 // ============================================

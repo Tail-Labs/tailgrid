@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import type { TailGridClassNames, TailGridColumn, FilterOperator, ColumnFilter as ColumnFilterType } from '@tailgrid/core';
 import { cx } from '../types';
 
@@ -130,10 +131,22 @@ export function ColumnFilter<TData>({
   const [operator, setOperator] = useState<FilterOperator>(filter?.operator || 'contains');
   const [value, setValue] = useState<string>(String(filter?.value ?? ''));
   const [value2, setValue2] = useState<string>(''); // For 'between' operator
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const availableOperators = operators || getOperatorsForType(column.dataType);
+
+  // Update popover position when opened
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopoverPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.right + window.scrollX - 240, // 240px is approx popover width
+      });
+    }
+  }, [isOpen]);
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -245,14 +258,20 @@ export function ColumnFilter<TData>({
         </svg>
       </button>
 
-      {/* Filter popover */}
-      {isOpen && (
+      {/* Filter popover - rendered via portal to escape overflow:hidden */}
+      {isOpen && createPortal(
         <div
           ref={popoverRef}
-          className={classNames.filterPopover}
+          className={cx(classNames.filterPopover, 'tailgrid-filter-popover')}
           role="dialog"
           aria-label={`Filter options for ${column.header}`}
           onKeyDown={handleKeyDown}
+          style={{
+            position: 'fixed',
+            top: popoverPosition.top,
+            left: Math.max(8, popoverPosition.left), // Ensure not off-screen
+            zIndex: 9999,
+          }}
         >
           <div className="tailgrid-filter-content">
             {/* Operator select */}
@@ -376,7 +395,8 @@ export function ColumnFilter<TData>({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

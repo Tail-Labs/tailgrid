@@ -9,6 +9,12 @@ export { SelectionCheckbox } from './components/SelectionCheckbox';
 export { ColumnResizer } from './components/ColumnResizer';
 export { VirtualizedBody } from './components/VirtualizedBody';
 export { ColumnFilter as ColumnFilterDropdown } from './components/ColumnFilter';
+export {
+  ThemeProvider,
+  ThemeToggle,
+  ThemeSelector,
+  useThemeContext,
+} from './components/ThemeProvider';
 
 // ============================================
 // HOOKS
@@ -19,6 +25,9 @@ export { useVirtualization } from './hooks/useVirtualization';
 export { useAIQuery } from './hooks/useAIQuery';
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 export { useAccessiblePrimitives } from './hooks/useAccessiblePrimitives.js';
+export { useTheme, defineTheme, lightTheme, darkTheme } from './hooks/useTheme';
+export { useRemoteData } from './hooks/useRemoteData';
+export { useTailGridQuery, createFetchFn } from './hooks/useTailGridQuery';
 
 // ============================================
 // TYPES
@@ -36,8 +45,17 @@ export type {
   UseKeyboardNavigationReturn,
 } from './types';
 
+export type {
+  RemoteGridConfig,
+  FetchParams,
+  FetchResult,
+  UseTailGridQueryReturn,
+  UrlFetchConfig,
+} from './hooks/useTailGridQuery';
+
 export {
   defaultClassNames,
+  emptyClassNames,
   mergeClassNames,
   cx,
 } from './types';
@@ -60,6 +78,9 @@ export type {
   PaginationInfo,
   RowSelection,
   SelectionState,
+  RemoteDataConfig,
+  RemoteRequestParams,
+  RemoteDataState,
   AIQueryResult,
   AIProviderConfig,
   AIQueryBarConfig,

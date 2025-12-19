@@ -1,45 +1,42 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  type SortingState,
-  type ColumnFiltersState,
-  type RowSelectionState,
-  type PaginationState,
-  type ColumnDef,
-} from '@tanstack/react-table';
-
-import type {
-  TailGridOptions,
-  TailGridColumn,
-  FilterState,
-  ColumnFilter,
-  PaginationInfo,
-  RowSelection,
+  GridEngine,
+  type TailGridOptions,
+  type TailGridColumn,
+  type ColumnFilter,
+  type PaginationInfo,
+  type RowSelection,
+  type GridRow,
+  type GridColumn,
 } from '@tailgrid/core';
 
+// Re-export sorting state type for convenience
+export type SortingState = Array<{ id: string; desc: boolean }>;
+
 export interface UseTailGridReturn<TData> {
-  /** TanStack React Table instance */
-  table: ReturnType<typeof useReactTable<TData>>;
+  // Row model
+  rows: TData[];
+  rowModel: GridRow<TData>[];
+
+  // Column model
+  columns: GridColumn<TData>[];
+  columnDefs: TailGridColumn<TData>[];
 
   // Sorting
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
-  toggleSort: (columnId: string) => void;
+  toggleSort: (columnId: string, multi?: boolean) => void;
   clearSorting: () => void;
 
   // Filtering
-  columnFilters: ColumnFiltersState;
+  columnFilters: ColumnFilter[];
   globalFilter: string;
   setColumnFilter: (columnId: string, value: unknown) => void;
   setGlobalFilter: (value: string) => void;
   clearFilters: () => void;
 
   // Pagination
-  pagination: PaginationState;
+  pagination: { pageIndex: number; pageSize: number };
   paginationInfo: PaginationInfo;
   setPageIndex: (index: number) => void;
   setPageSize: (size: number) => void;
@@ -49,22 +46,41 @@ export interface UseTailGridReturn<TData> {
   lastPage: () => void;
 
   // Selection
-  rowSelection: RowSelectionState;
+  rowSelection: RowSelection;
   selectedRows: TData[];
   toggleRowSelection: (rowId: string) => void;
   toggleAllRowsSelection: () => void;
   clearSelection: () => void;
+  getIsAllRowsSelected: () => boolean;
+  getIsSomeRowsSelected: () => boolean;
 
-  // Data
-  rows: TData[];
+  // Column sizing
+  columnSizing: Record<string, number>;
+  setColumnSize: (columnId: string, size: number) => void;
+  getColumnSize: (columnId: string) => number;
+  resetColumnSize: (columnId: string) => void;
+  setResizingColumnId: (columnId: string | null) => void;
+  resizingColumnId: string | null;
+
+  // Data access API
+  getRowById: (rowId: string) => TData | undefined;
+  getRowByIndex: (index: number) => TData | undefined;
+  getCellValue: (rowId: string, columnId: string) => unknown;
+  setCellValue: (rowId: string, columnId: string, value: unknown) => void;
+  updateRow: (rowId: string, updates: Partial<TData>) => void;
+  addRow: (row: TData) => void;
+  removeRow: (rowId: string) => void;
+  getColumnIds: () => string[];
+  getColumnById: (columnId: string) => TailGridColumn<TData> | undefined;
+  getColumnValues: (columnId: string) => unknown[];
 }
 
 /**
- * React hook for TailGrid
+ * React hook for TailGrid - Custom implementation without TanStack Table
  *
  * @example
  * ```tsx
- * const { table, rows, sorting, setSorting } = useTailGrid({
+ * const { rows, sorting, setSorting } = useTailGrid({
  *   data: users,
  *   columns: [
  *     { id: 'name', header: 'Name', accessorKey: 'name' },
@@ -77,167 +93,287 @@ export interface UseTailGridReturn<TData> {
 export function useTailGrid<TData>(
   options: TailGridOptions<TData>
 ): UseTailGridReturn<TData> {
-  // State
-  const [sorting, setSorting] = useState<SortingState>(
+  // Create engine ref to maintain instance across renders
+  const engineRef = useRef<GridEngine<TData> | null>(null);
+
+  // Initialize engine
+  if (!engineRef.current) {
+    engineRef.current = new GridEngine({
+      data: options.data,
+      columns: options.columns,
+      initialSorting: options.initialSorting,
+      initialColumnFilters: options.initialFilters?.columnFilters,
+      initialGlobalFilter: options.initialFilters?.globalFilter,
+      initialPagination: options.initialPagination ?? {
+        pageIndex: 0,
+        pageSize: (options as unknown as { pageSize?: number }).pageSize ?? 10,
+      },
+      initialRowSelection: options.initialRowSelection,
+      enableSorting: options.enableSorting,
+      enableFiltering: options.enableFiltering,
+      enablePagination: options.enablePagination,
+      enableRowSelection: options.enableRowSelection,
+      enableMultiRowSelection: options.enableMultiRowSelection,
+      getRowId: options.getRowId,
+    });
+  }
+
+  const engine = engineRef.current;
+
+  // Synchronize engine options immediately (not in useEffect)
+  // This ensures the engine has the correct options before rendering
+  engine.setOptions({
+    enableSorting: options.enableSorting,
+    enableFiltering: options.enableFiltering,
+    enablePagination: options.enablePagination,
+    enableRowSelection: options.enableRowSelection,
+    enableMultiRowSelection: options.enableMultiRowSelection,
+  });
+
+  // Update engine when data or columns change
+  useEffect(() => {
+    engine.setData(options.data);
+  }, [options.data, engine]);
+
+  useEffect(() => {
+    engine.setColumns(options.columns);
+  }, [options.columns, engine]);
+
+  // State for triggering re-renders
+  const [, forceUpdate] = useState({});
+  const rerender = useCallback(() => forceUpdate({}), []);
+
+  // Sorting state
+  const [sorting, setSortingState] = useState<SortingState>(
     options.initialSorting ?? []
   );
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: options.initialPagination?.pageIndex ?? 0,
-    pageSize: options.initialPagination?.pageSize ?? 10,
-  });
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
-    options.initialRowSelection ?? {}
-  );
 
-  // Convert columns
-  const columns = useMemo<ColumnDef<TData>[]>(
-    () =>
-      options.columns.map((col) => ({
-        id: col.id,
-        header: col.header,
-        accessorKey: col.accessorKey,
-        accessorFn: col.accessorFn,
-        enableSorting: col.enableSorting ?? options.enableSorting ?? true,
-        enableColumnFilter: col.enableFiltering ?? options.enableFiltering ?? true,
-        size: col.width,
-        minSize: col.minWidth ?? 50,
-        maxSize: col.maxWidth ?? 500,
-      })),
-    [options.columns, options.enableSorting, options.enableFiltering]
-  );
-
-  // Create table
-  const table = useReactTable({
-    data: options.data,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      pagination,
-      rowSelection,
-    },
-    onSortingChange: (updater) => {
-      const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
-      setSorting(newSorting);
+  const setSorting = useCallback(
+    (newSorting: SortingState) => {
+      engine.setSorting(newSorting);
+      setSortingState(newSorting);
       options.onSortingChange?.(newSorting);
     },
-    onColumnFiltersChange: (updater) => {
-      const newFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
-      setColumnFilters(newFilters);
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: (updater) => {
-      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      options.onPaginationChange?.(newPagination);
-    },
-    onRowSelectionChange: (updater) => {
-      const newSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
-      setRowSelection(newSelection);
-      options.onRowSelectionChange?.(newSelection);
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: options.enableSorting ? getSortedRowModel() : undefined,
-    getFilteredRowModel: options.enableFiltering ? getFilteredRowModel() : undefined,
-    getPaginationRowModel: options.enablePagination ? getPaginationRowModel() : undefined,
-    enableRowSelection: options.enableRowSelection,
-    enableMultiRowSelection: options.enableMultiRowSelection ?? true,
-    getRowId: options.getRowId,
-  });
+    [engine, options]
+  );
 
-  // Sorting helpers
   const toggleSort = useCallback(
-    (columnId: string) => {
-      const column = table.getColumn(columnId);
-      column?.toggleSorting();
+    (columnId: string, multi = false) => {
+      engine.toggleSort(columnId, multi);
+      const newSorting = engine.getSorting();
+      setSortingState(newSorting);
+      options.onSortingChange?.(newSorting);
     },
-    [table]
+    [engine, options]
   );
 
   const clearSorting = useCallback(() => {
-    setSorting([]);
-    table.resetSorting();
-  }, [table]);
+    engine.clearSorting();
+    setSortingState([]);
+    options.onSortingChange?.([]);
+  }, [engine, options]);
 
-  // Filter helpers
-  const setColumnFilterValue = useCallback(
+  // Filtering state
+  const [columnFilters, setColumnFiltersState] = useState<ColumnFilter[]>(
+    options.initialFilters?.columnFilters ?? []
+  );
+  const [globalFilter, setGlobalFilterState] = useState(
+    options.initialFilters?.globalFilter ?? ''
+  );
+
+  const setColumnFilter = useCallback(
     (columnId: string, value: unknown) => {
-      const column = table.getColumn(columnId);
-      column?.setFilterValue(value);
+      engine.setColumnFilter(columnId, value);
+      const newFilters = engine.getColumnFilters();
+      setColumnFiltersState(newFilters);
+      options.onFiltersChange?.({
+        columnFilters: newFilters,
+        globalFilter: engine.getGlobalFilter(),
+      });
     },
-    [table]
+    [engine, options]
+  );
+
+  const setGlobalFilter = useCallback(
+    (value: string) => {
+      engine.setGlobalFilter(value);
+      setGlobalFilterState(value);
+      options.onFiltersChange?.({
+        columnFilters: engine.getColumnFilters(),
+        globalFilter: value,
+      });
+    },
+    [engine, options]
   );
 
   const clearFilters = useCallback(() => {
-    setColumnFilters([]);
-    setGlobalFilter('');
-    table.resetColumnFilters();
-    table.resetGlobalFilter();
-  }, [table]);
+    engine.clearFilters();
+    setColumnFiltersState([]);
+    setGlobalFilterState('');
+    options.onFiltersChange?.({ columnFilters: [], globalFilter: '' });
+  }, [engine, options]);
 
-  // Pagination helpers
+  // Pagination state
+  const [pagination, setPaginationState] = useState({
+    pageIndex: options.initialPagination?.pageIndex ?? 0,
+    pageSize: options.initialPagination?.pageSize ?? (options as unknown as { pageSize?: number }).pageSize ?? 10,
+  });
+
   const setPageIndex = useCallback(
-    (index: number) => table.setPageIndex(index),
-    [table]
+    (index: number) => {
+      engine.setPageIndex(index);
+      const newPagination = engine.getPagination();
+      setPaginationState(newPagination);
+      options.onPaginationChange?.(newPagination);
+    },
+    [engine, options]
   );
 
   const setPageSize = useCallback(
-    (size: number) => table.setPageSize(size),
-    [table]
+    (size: number) => {
+      engine.setPageSize(size);
+      const newPagination = engine.getPagination();
+      setPaginationState(newPagination);
+      options.onPaginationChange?.(newPagination);
+    },
+    [engine, options]
   );
 
-  const nextPage = useCallback(() => table.nextPage(), [table]);
-  const previousPage = useCallback(() => table.previousPage(), [table]);
-  const firstPage = useCallback(() => table.firstPage(), [table]);
-  const lastPage = useCallback(() => table.lastPage(), [table]);
+  const nextPage = useCallback(() => {
+    engine.nextPage();
+    const newPagination = engine.getPagination();
+    setPaginationState(newPagination);
+    options.onPaginationChange?.(newPagination);
+  }, [engine, options]);
 
-  const paginationInfo = useMemo<PaginationInfo>(
-    () => ({
-      pageIndex: pagination.pageIndex,
-      pageSize: pagination.pageSize,
-      pageCount: table.getPageCount(),
-      totalRows: table.getFilteredRowModel().rows.length,
-      canPreviousPage: table.getCanPreviousPage(),
-      canNextPage: table.getCanNextPage(),
-    }),
-    [pagination, table]
+  const previousPage = useCallback(() => {
+    engine.previousPage();
+    const newPagination = engine.getPagination();
+    setPaginationState(newPagination);
+    options.onPaginationChange?.(newPagination);
+  }, [engine, options]);
+
+  const firstPage = useCallback(() => {
+    engine.firstPage();
+    const newPagination = engine.getPagination();
+    setPaginationState(newPagination);
+    options.onPaginationChange?.(newPagination);
+  }, [engine, options]);
+
+  const lastPage = useCallback(() => {
+    engine.lastPage();
+    const newPagination = engine.getPagination();
+    setPaginationState(newPagination);
+    options.onPaginationChange?.(newPagination);
+  }, [engine, options]);
+
+  // Selection state
+  const [rowSelection, setRowSelectionState] = useState<RowSelection>(
+    options.initialRowSelection ?? {}
   );
 
-  // Selection helpers
   const toggleRowSelection = useCallback(
     (rowId: string) => {
-      const row = table.getRow(rowId);
-      row?.toggleSelected();
+      engine.toggleRowSelection(rowId);
+      const newSelection = engine.getRowSelection();
+      setRowSelectionState(newSelection);
+      options.onRowSelectionChange?.(newSelection);
     },
-    [table]
+    [engine, options]
   );
 
-  const toggleAllRowsSelection = useCallback(
-    () => table.toggleAllRowsSelected(),
-    [table]
-  );
+  const toggleAllRowsSelection = useCallback(() => {
+    engine.toggleAllRowsSelection();
+    const newSelection = engine.getRowSelection();
+    setRowSelectionState(newSelection);
+    options.onRowSelectionChange?.(newSelection);
+  }, [engine, options]);
 
   const clearSelection = useCallback(() => {
-    setRowSelection({});
-    table.resetRowSelection();
-  }, [table]);
+    engine.clearSelection();
+    setRowSelectionState({});
+    options.onRowSelectionChange?.({});
+  }, [engine, options]);
 
-  const selectedRows = useMemo(
-    () => table.getSelectedRowModel().rows.map((row) => row.original),
-    [table, rowSelection]
+  const getIsAllRowsSelected = useCallback(
+    () => engine.getIsAllRowsSelected(),
+    [engine]
   );
 
-  // Current page rows
+  const getIsSomeRowsSelected = useCallback(
+    () => engine.getIsSomeRowsSelected(),
+    [engine]
+  );
+
+  // Column sizing state
+  const [columnSizing, setColumnSizingState] = useState<Record<string, number>>(
+    engine.getColumnSizing()
+  );
+  const [resizingColumnId, setResizingColumnIdState] = useState<string | null>(null);
+
+  const setColumnSize = useCallback(
+    (columnId: string, size: number) => {
+      engine.setColumnSize(columnId, size);
+      setColumnSizingState(engine.getColumnSizing());
+    },
+    [engine]
+  );
+
+  const getColumnSize = useCallback(
+    (columnId: string) => engine.getColumnSize(columnId),
+    [engine]
+  );
+
+  const resetColumnSize = useCallback(
+    (columnId: string) => {
+      engine.resetColumnSize(columnId);
+      setColumnSizingState(engine.getColumnSizing());
+    },
+    [engine]
+  );
+
+  const setResizingColumnId = useCallback(
+    (columnId: string | null) => {
+      engine.setResizingColumnId(columnId);
+      setResizingColumnIdState(columnId);
+    },
+    [engine]
+  );
+
+  // Computed values
+  const paginationInfo = useMemo(
+    () => engine.getPaginationInfo(),
+    [engine, pagination, sorting, columnFilters, globalFilter]
+  );
+
   const rows = useMemo(
-    () => table.getRowModel().rows.map((row) => row.original),
-    [table, pagination, sorting, columnFilters, globalFilter]
+    () => engine.getPaginatedRows(),
+    [engine, pagination, sorting, columnFilters, globalFilter, options.data]
+  );
+
+  const rowModel = useMemo(
+    () => engine.getRowModel(),
+    [engine, pagination, sorting, columnFilters, globalFilter, rowSelection, options.data, options.enableRowSelection]
+  );
+
+  const columns = useMemo(
+    () => engine.getColumns(),
+    [engine, sorting, columnSizing, resizingColumnId, options.columns]
+  );
+
+  const selectedRows = useMemo(
+    () => engine.getSelectedRows(),
+    [engine, rowSelection]
   );
 
   return {
-    table,
+    // Row model
+    rows,
+    rowModel,
+
+    // Column model
+    columns,
+    columnDefs: options.columns,
 
     // Sorting
     sorting,
@@ -248,7 +384,7 @@ export function useTailGrid<TData>(
     // Filtering
     columnFilters,
     globalFilter,
-    setColumnFilter: setColumnFilterValue,
+    setColumnFilter,
     setGlobalFilter,
     clearFilters,
 
@@ -268,8 +404,39 @@ export function useTailGrid<TData>(
     toggleRowSelection,
     toggleAllRowsSelection,
     clearSelection,
+    getIsAllRowsSelected,
+    getIsSomeRowsSelected,
 
-    // Data
-    rows,
+    // Column sizing
+    columnSizing,
+    setColumnSize,
+    getColumnSize,
+    resetColumnSize,
+    setResizingColumnId,
+    resizingColumnId,
+
+    // Data access API
+    getRowById: (rowId: string) => engine.getRowById(rowId),
+    getRowByIndex: (index: number) => engine.getRowByIndex(index),
+    getCellValue: (rowId: string, columnId: string) => engine.getCellValue(rowId, columnId),
+    setCellValue: (rowId: string, columnId: string, value: unknown) => {
+      engine.setCellValue(rowId, columnId, value);
+      rerender();
+    },
+    updateRow: (rowId: string, updates: Partial<TData>) => {
+      engine.updateRow(rowId, updates);
+      rerender();
+    },
+    addRow: (row: TData) => {
+      engine.addRow(row);
+      rerender();
+    },
+    removeRow: (rowId: string) => {
+      engine.removeRow(rowId);
+      rerender();
+    },
+    getColumnIds: () => engine.getColumnIds(),
+    getColumnById: (columnId: string) => engine.getColumnById(columnId),
+    getColumnValues: (columnId: string) => engine.getColumnValues(columnId),
   };
 }
